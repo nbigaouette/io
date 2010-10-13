@@ -24,21 +24,54 @@ include makefiles/Makefile.rules
 
 LIB_OBJ          = $(OBJ)
 
-test:
-	# HEADERS = $(HEADERS)
-	# SOURCES = $(SOURCES)
-	# OBJ = $(OBJ)
-	# LIB = $(LIB)
+# TinyXML might report failures under valgrind when compiled with
+# Intel's compiler (optimized or not). To fix this, tell TinyXML
+# to use STL's strings internally.
+CFLAGS          += -DTIXML_USE_STL
+
+
+################################################################
+### StdCout library default location (home directory)
+LibName         := stdcout
+LibIncludes     := $(HOME)/usr/include
+ifeq ($(DESTDIRCOMPILER),gcc)
+LibLocation     := $(HOME)/usr/lib
+else
+LibLocation     := $(HOME)/usr/lib/$(DESTDIRCOMPILER)
+endif
+
+### Check if the location exist. If not, try the /usr directoy
+ifeq ($(wildcard $(LibLocation)/lib$(LibName).*),)
+LibIncludes     := /usr/include
+ifeq ($(DESTDIRCOMPILER),gcc)
+LibLocation     := /usr/lib
+else
+LibLocation     := /usr/lib/$(DESTDIRCOMPILER)
+endif
+endif
+
+### If library is not found, bail out!
+ifeq ($(wildcard $(LibLocation)/lib$(LibName).*),)
+$(error ERROR: $(LibName) could not be found in "$(LibLocation)"! Please install it from ssh://optimusprime.selfip.net/git/nicolas/$(LibName).git)
+endif
+
+# The following lines are needed else gnu make will many times the last library
+StdCout_Lib_CFLAGS      := -I$(LibIncludes)
+ifeq ($(LINK_PREFERED),shared)
+StdCout_Lib_LDFLAGS     := -L$(LibLocation) -l$(LibName) $(RPATH)$(LibLocation)
+else # static
+StdCout_Lib_LDFLAGS     := $(LibLocation)/lib$(LibName).a
+endif
+
+### Add library flags
+CFLAGS          += $(StdCout_Lib_CFLAGS)
+LDFLAGS         += $(StdCout_Lib_LDFLAGS)
+################################################################
 
 ### Just build "full" and install
 .PHONY: f
 f:
 	$(MAKE) shared static install $(filter-out f, $(MAKECMDGOALS) )
-
-# TinyXML might report failures under valgrind when compiled with
-# Intel's compiler (optimized or not). To fix this, tell TinyXML
-# to use STL's strings internally.
-CFLAGS          += -DTIXML_USE_STL
 
 .PHONY: shared lib_shared
 shared: lib_shared
@@ -92,14 +125,15 @@ endif
 ### Add compiler to library directory, but only if not GCC
 DESTDIR_INC      = $(DESTDIR)/include/$(LIB)
 ifeq ($(DESTDIRCOMPILER),gcc)
-DESTDIR_LIB      = $(DESTDIR)/lib
+DESTDIR_LIB     := $(DESTDIR)/lib
 else
-    DESTDIR_LIB := $(DESTDIR)/lib/$(DESTDIRCOMPILER)
+DESTDIR_LIB     := $(DESTDIR)/lib/$(DESTDIRCOMPILER)
 endif
 
 HEADERS_NOTESTING=$(filter-out $(wildcard testing/*.$(HEADEXT)), $(HEADERS) )
 HEADERS_NOTESTING_NOSRC=$(subst src/,,$(HEADERS_NOTESTING) )
-INSTALLED_HEADERS=$(addprefix $(DESTDIR)/include/$(LIB)/, $(HEADERS_NOTESTING_NOSRC) )
+HEADERS_NOTESTING_NOSRC_NOMEM=$(filter-out Constants.hpp, $(HEADERS_NOTESTING_NOSRC) )
+INSTALLED_HEADERS=$(addprefix $(DESTDIR)/include/$(LIB)/, $(HEADERS_NOTESTING_NOSRC_NOMEM) )
 ###############################################################
 
 
@@ -160,5 +194,14 @@ uninstall: force
 	$(SUDO) $(RM) $(DESTDIR_LIB)/lib$(LIB)*
 	######## Removing library headers from $(DESTDIR_INC)... ###
 	$(SUDO) $(RM) -r $(DESTDIR_INC)
+
+test:
+	# INSTALLED_HEADERS = $(INSTALLED_HEADERS)
+	# HEADERS = $(HEADERS)
+	# SOURCES = $(SOURCES)
+	# OBJ = $(OBJ)
+	# LIB = $(LIB)
+	# DESTDIR = $(DESTDIR)
+	# DESTDIR_INC = $(DESTDIR_INC)
 
 ############ End of file ########################################
