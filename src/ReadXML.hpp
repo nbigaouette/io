@@ -1,7 +1,10 @@
 #ifndef INC_IONIZATION_LIB_IO_hpp
 #define INC_IONIZATION_LIB_IO_hpp
 
-#include "tinyxml/tinyxml.hpp"
+#include <stdint.h> // (u)int64_t
+
+#include "tinyxml.hpp"
+
 
 // Reading of the XML input file
 
@@ -36,6 +39,9 @@ void        XML_Verify_Units(TiXmlDocument &input, TiXmlNode *root, const std::s
                              const std::string &units);
 bool        XML_Get_Enable(TiXmlDocument &input, TiXmlNode *root, const std::string &path);
 double      Get_Unit_Factor_Length(const std::string &unit);
+
+int XML_Count_Elements(TiXmlNode *root, const std::string &element);
+
 
 #endif // INC_IONIZATION_LIB_IO_hpp
 

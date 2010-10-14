@@ -26,8 +26,6 @@ using namespace libtinyxml;
 void XML_SplitString(const std::string &to_split, const char delimiter,
                      std::vector<std::string> &split_strings);
 
-int XML_Count_Elements(TiXmlNode *root, const std::string &element);
-
 // **************************************************************
 // ********** Accessible functions implementations **************
 // **************************************************************
@@ -48,7 +46,7 @@ TiXmlNode * XML_Get_SubNode_Matching_Attribute(TiXmlNode *root,
             != TIXML_SUCCESS
             )
         {
-            DEBUGP("ERROR: XML_Get_SubNode_Matching_Attribute() failed\n");
+            DEBUGP("ERROR: XML_Get_SubNode_Matching_Attribute() failed!\n");
             std_cout
                 << "root: <" << root->Value() << "> (" << root << "), "
                 << "elements: " << elements << ", "
@@ -63,7 +61,11 @@ TiXmlNode * XML_Get_SubNode_Matching_Attribute(TiXmlNode *root,
     );
     if (subnode == NULL)
     {
-        std_cout << std::flush;
+        DEBUGP("ERROR: XML_Get_SubNode_Matching_Attribute() failed!\n");
+        std_cout << "elements = " << elements << "\n"
+                 << "attribute = " << attribute << "\n"
+                 << "attribute_value = " << attribute_value << "\n"
+                 << std::flush;
         abort();
     }
     else
