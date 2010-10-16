@@ -8,7 +8,7 @@
 #################################################################
 
 # Project options
-LIB             := tinyxml
+LIB             := xmlinput
 BIN              = $(LIB)_test
 SRCDIRS          = src
 SRCEXT           = cpp
