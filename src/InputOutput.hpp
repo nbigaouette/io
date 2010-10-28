@@ -75,6 +75,7 @@ class ReadXML
         TiXmlNode*  Get_SubNode(const std::string elements);
 
     public:
+        ReadXML(const std::string name, const std::string _filename);
         void Open(const std::string name, const std::string _filename);
         void Dump(const std::string _filename);
 

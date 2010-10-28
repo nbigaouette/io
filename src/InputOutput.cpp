@@ -300,6 +300,12 @@ void IO::Print()
 }
 
 // **************************************************************
+ReadXML::ReadXML(const std::string name, const std::string _filename)
+{
+    this->Open(name, _filename);
+}
+
+// **************************************************************
 void ReadXML::Open(const std::string _name, const std::string _filename)
 {
     name        = _name;
