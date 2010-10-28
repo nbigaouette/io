@@ -101,6 +101,17 @@ class ReadXML
                                                    const std::string &elements,
                                                    const std::string &attribute,
                                                    const int attribute_value);
+        TiXmlNode * Get_SubNode_Matching_Attribute(TiXmlNode *root,
+                                                   const std::string &elements,
+                                                   const std::string &attribute1,
+                                                   const int attribute1_value,
+                                                   const std::string &attribute2,
+                                                   const int attribute2_value);
+        TiXmlNode * Get_SubNode_Matching_Attribute(TiXmlNode *root,
+                                                   const std::string &elements,
+                                                   const std::string &attribute,
+                                                   const std::string &attribute_value);
+
         template <class T>
         void        Set(const std::string element, const T value)
         {
