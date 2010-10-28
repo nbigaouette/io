@@ -94,7 +94,9 @@ class ReadXML
         double      Get_Double_Length_AU(   const std::string element);
 
         void        Set_String(const std::string element, const std::string value);
+
         TiXmlNode * Get_SubNode(const std::string elements);
+        TiXmlNode * Get_SubNode(TiXmlNode *RootNode, const std::string &celements);
         TiXmlNode * Get_SubNode_Matching_Attribute(TiXmlNode *root,
                                                    const std::string &elements,
                                                    const std::string &attribute,
