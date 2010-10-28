@@ -388,11 +388,8 @@ TiXmlNode * ReadXML::Get_SubNode(const std::string elements)
 }
 
 // **************************************************************
-TiXmlNode * ReadXML::Get_SubNode(TiXmlNode *RootNode, const std::string &celements)
+TiXmlNode * ReadXML::Get_SubNode(TiXmlNode *subnode, const std::string &celements)
 {
-    // Temporary node
-    TiXmlNode *subnode = RootNode;
-
     // Split the XML path string into many substrings, saved in a vector
     std::vector<std::string> subelements;
     Split_String(celements, '/', subelements);
@@ -537,10 +534,13 @@ TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
 }
 
 // **************************************************************
-std::string ReadXML::Get_String(const std::string element)
+std::string ReadXML::Get_String(const std::string element, TiXmlNode *subnode)
 {
+    if (subnode == NULL)
+        subnode = Get_SubNode(element);
+
     std::string buff;
-    TiXmlNode *subnode = Get_SubNode(element);
+
     if (subnode != NULL)
         buff = std::string(subnode->FirstChild()->Value());
     else
@@ -554,9 +554,9 @@ std::string ReadXML::Get_String(const std::string element)
 }
 
 // **************************************************************
-bool ReadXML::Get_Bool(const std::string element)
+bool ReadXML::Get_Bool(const std::string element, TiXmlNode *subnode)
 {
-    std::string temp = Get_String(element);
+    std::string temp = Get_String(element, subnode);
 
     bool return_value;
 
@@ -576,9 +576,9 @@ bool ReadXML::Get_Bool(const std::string element)
 }
 
 // **************************************************************
-bool ReadXML::Get_Enable(const std::string element)
+bool ReadXML::Get_Enable(const std::string element, TiXmlNode *subnode)
 {
-    std::string temp = Get_Attribute_String(element, "enable");
+    std::string temp = Get_Attribute_String(element, "enable", subnode);
 
     bool return_value;
 
@@ -598,33 +598,33 @@ bool ReadXML::Get_Enable(const std::string element)
 }
 
 // **************************************************************
-double ReadXML::Get_Double(const std::string element)
+double ReadXML::Get_Double(const std::string element, TiXmlNode *subnode)
 {
-    return double(atof(Get_String(element).c_str()));
+    return double(atof(Get_String(element, subnode).c_str()));
 }
 
 // **************************************************************
-int ReadXML::Get_Int(const std::string element)
+int ReadXML::Get_Int(const std::string element, TiXmlNode *subnode)
 {
-    return atoi(Get_String(element).c_str());
+    return atoi(Get_String(element, subnode).c_str());
 }
 
 // **************************************************************
-long int ReadXML::Get_LInt(const std::string element)
+long int ReadXML::Get_LInt(const std::string element, TiXmlNode *subnode)
 {
-    return atol(Get_String(element).c_str());
+    return atol(Get_String(element, subnode).c_str());
 }
 
 // **************************************************************
-int64_t ReadXML::Get_Int64(const std::string element)
+int64_t ReadXML::Get_Int64(const std::string element, TiXmlNode *subnode)
 {
-    return int64_t(atof(Get_String(element).c_str()));
+    return int64_t(atof(Get_String(element, subnode).c_str()));
 }
 
 // **************************************************************
-uint64_t ReadXML::Get_UInt64(const std::string element)
+uint64_t ReadXML::Get_UInt64(const std::string element, TiXmlNode *subnode)
 {
-    const double tmp_double = double(atof(Get_String(element).c_str()));
+    const double tmp_double = double(atof(Get_String(element, subnode).c_str()));
     assert(tmp_double >= 0.0);
     return uint64_t(tmp_double);
 }
@@ -654,17 +654,26 @@ double ReadXML::Get_Double_Length_AU(const std::string element)
 }
 
 // **************************************************************
-std::string ReadXML::Get_Attribute_String(const std::string element, const std::string attribute)
+std::string ReadXML::Get_Attribute_String(const std::string element, const std::string attribute, TiXmlNode *subnode)
 {
-    TiXmlNode *SubNode = Get_SubNode(element);
-    if (SubNode == NULL)
+    if (element == "" && subnode == NULL)
+    {
+        std_cout << "ReadXML::Get_Attribute_String() failed!\n";
+        std_cout << "When providing an empty element, a subnode pointer need to be passed!\n" << std::flush;
+        abort();
+    }
+
+    if (subnode == NULL)
+        subnode = Get_SubNode(element);
+
+    if (subnode == NULL)
     {
         std_cout << "ReadXML::Get_Attribute_String() failed!\n";
         std_cout << "Element \"" << element << "\" not found!\n" << std::flush;
         abort();
     }
 
-    const char *found_attribute = SubNode->ToElement()->Attribute(attribute.c_str());
+    const char *found_attribute = subnode->ToElement()->Attribute(attribute.c_str());
     if (found_attribute == NULL)
     {
         std_cout << "ERROR: Attribute '" << attribute << "' in '" << element << "' not found!\n";
@@ -675,9 +684,9 @@ std::string ReadXML::Get_Attribute_String(const std::string element, const std::
 }
 
 // **************************************************************
-bool ReadXML::Get_Attribute_Bool(const std::string element, const std::string attribute)
+bool ReadXML::Get_Attribute_Bool(const std::string element, const std::string attribute, TiXmlNode *subnode)
 {
-    std::string temp = Get_Attribute_String(element, attribute);
+    std::string temp = Get_Attribute_String(element, attribute, subnode);
 
     bool return_value;
 
@@ -697,33 +706,33 @@ bool ReadXML::Get_Attribute_Bool(const std::string element, const std::string at
 }
 
 // **************************************************************
-double ReadXML::Get_Attribute_Double(const std::string element, const std::string attribute)
+double ReadXML::Get_Attribute_Double(const std::string element, const std::string attribute, TiXmlNode *subnode)
 {
-    return double(atof(Get_Attribute_String(element, attribute).c_str()));
+    return double(atof(Get_Attribute_String(element, attribute, subnode).c_str()));
 }
 
 // **************************************************************
-int ReadXML::Get_Attribute_Int(const std::string element, const std::string attribute)
+int ReadXML::Get_Attribute_Int(const std::string element, const std::string attribute, TiXmlNode *subnode)
 {
-    return atoi(Get_Attribute_String(element, attribute).c_str());
+    return atoi(Get_Attribute_String(element, attribute, subnode).c_str());
 }
 
 // **************************************************************
-long int ReadXML::Get_Attribute_LInt(const std::string element, const std::string attribute)
+long int ReadXML::Get_Attribute_LInt(const std::string element, const std::string attribute, TiXmlNode *subnode)
 {
-    return atol(Get_Attribute_String(element, attribute).c_str());
+    return atol(Get_Attribute_String(element, attribute, subnode).c_str());
 }
 
 // **************************************************************
-int64_t ReadXML::Get_Attribute_Int64(const std::string element, const std::string attribute)
+int64_t ReadXML::Get_Attribute_Int64(const std::string element, const std::string attribute, TiXmlNode *subnode)
 {
-    return int64_t(atof(Get_Attribute_String(element, attribute).c_str()));
+    return int64_t(atof(Get_Attribute_String(element, attribute, subnode).c_str()));
 }
 
 // **************************************************************
-uint64_t ReadXML::Get_Attribute_UInt64(const std::string element, const std::string attribute)
+uint64_t ReadXML::Get_Attribute_UInt64(const std::string element, const std::string attribute, TiXmlNode *subnode)
 {
-    const double tmp_double = double(atof(Get_Attribute_String(element, attribute).c_str()));
+    const double tmp_double = double(atof(Get_Attribute_String(element, attribute, subnode).c_str()));
     assert(tmp_double >= 0.0);
     return uint64_t(tmp_double);
 }
