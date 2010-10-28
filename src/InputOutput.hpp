@@ -72,7 +72,6 @@ class ReadXML
         //TiXmlHandle     Handle;     // inputHandle
 
         void        Split_String(const std::string &to_split, const char delimiter, std::vector<std::string> &split_strings);
-        TiXmlNode*  Get_SubNode(const std::string elements);
 
     public:
         ReadXML(const std::string name, const std::string _filename);
