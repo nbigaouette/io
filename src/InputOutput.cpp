@@ -620,6 +620,27 @@ void ReadXML::Set_String(const std::string element, const std::string value)
 }
 
 // **************************************************************
+int ReadXML::Count_Elements(TiXmlNode *root, const std::string &element)
+{
+    int count = 0;
+
+    // The pointer needs to be null initially for IterateChildren()
+    // to work.
+    TiXmlNode *subnode = NULL;
+    subnode = root->IterateChildren(subnode);
+    while ( subnode != 0 )
+    {
+        // If the name of the subnode is really the element we want
+        // to count, increment the counter.
+        if (std::string(subnode->Value()) == element)
+            count++;
+        // Then go to next children of the parent
+        subnode = root->IterateChildren(subnode);
+    }
+    return count;
+}
+
+// **************************************************************
 void ReadXML::Verify_Attribute(const std::string element, const std::string attribute, const std::string value)
 {
     const std::string read_attribute_value = Get_Attribute_String(element, attribute);

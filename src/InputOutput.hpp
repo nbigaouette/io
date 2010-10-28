@@ -121,6 +121,8 @@ class ReadXML
         void        Verify_Unit(const std::string element, const std::string unit);
         bool        Is_Enable(const std::string element);
 
+        int         Count_Elements(TiXmlNode *root, const std::string &element);
+
         double      Factor_Unit_To_Metre(       const std::string element);
         double      Factor_Unit_To_Second(      const std::string element);
         double      Factor_Unit_To_Length_AU(   const std::string element);
