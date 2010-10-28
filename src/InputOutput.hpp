@@ -79,19 +79,19 @@ class ReadXML
         void Dump(const std::string _filename);
 
         // Get elements
-        std::string Get_String(const std::string element);
-        bool        Get_Bool(const std::string element);
-        double      Get_Double(const std::string element);
-        int         Get_Int(const std::string element);
-        long int    Get_LInt(const std::string element);
-        int64_t     Get_Int64(const std::string element);
-        uint64_t    Get_UInt64(const std::string element);
-        bool        Get_Enable(const std::string element);
+        std::string Get_String( const std::string element);
+        bool        Get_Bool(   const std::string element);
+        double      Get_Double( const std::string element);
+        int         Get_Int(    const std::string element);
+        long int    Get_LInt(   const std::string element);
+        int64_t     Get_Int64(  const std::string element);
+        uint64_t    Get_UInt64( const std::string element);
+        bool        Get_Enable( const std::string element);
 
-        double      Get_Double_Time_Second(const std::string element);
-        double      Get_Double_Time_AU(const std::string element);
+        double      Get_Double_Time_Second( const std::string element);
+        double      Get_Double_Time_AU(     const std::string element);
         double      Get_Double_Length_Meter(const std::string element);
-        double      Get_Double_Length_AU(const std::string element);
+        double      Get_Double_Length_AU(   const std::string element);
 
         void        Set_String(const std::string element, const std::string value);
         TiXmlNode * Get_SubNode(const std::string elements);
@@ -108,23 +108,23 @@ class ReadXML
         }
 
         // Get attributes
-        std::string Get_Attribute_String(const std::string element, const std::string attribute);
-        bool        Get_Attribute_Bool(const std::string element, const std::string attribute);
-        double      Get_Attribute_Double(const std::string element, const std::string attribute);
-        int         Get_Attribute_Int(const std::string element, const std::string attribute);
-        long int    Get_Attribute_LInt(const std::string element, const std::string attribute);
-        int64_t     Get_Attribute_Int64(const std::string element, const std::string attribute);
-        uint64_t    Get_Attribute_UInt64(const std::string element, const std::string attribute);
+        std::string Get_Attribute_String(   const std::string element, const std::string attribute);
+        bool        Get_Attribute_Bool(     const std::string element, const std::string attribute);
+        double      Get_Attribute_Double(   const std::string element, const std::string attribute);
+        int         Get_Attribute_Int(      const std::string element, const std::string attribute);
+        long int    Get_Attribute_LInt(     const std::string element, const std::string attribute);
+        int64_t     Get_Attribute_Int64(    const std::string element, const std::string attribute);
+        uint64_t    Get_Attribute_UInt64(   const std::string element, const std::string attribute);
 
         std::string Get_Unit(const std::string element);
         void        Verify_Attribute(const std::string element, const std::string attribute, const std::string value);
         void        Verify_Unit(const std::string element, const std::string unit);
         bool        Is_Enable(const std::string element);
 
-        double      Factor_Unit_To_Metre(const std::string element);
-        double      Factor_Unit_To_Second(const std::string element);
-        double      Factor_Unit_To_Length_AU(const std::string element);
-        double      Factor_Unit_To_Time_AU(const std::string element);
+        double      Factor_Unit_To_Metre(       const std::string element);
+        double      Factor_Unit_To_Second(      const std::string element);
+        double      Factor_Unit_To_Length_AU(   const std::string element);
+        double      Factor_Unit_To_Time_AU(     const std::string element);
 };
 
 #endif // INC_CLASSES_IO_hpp
