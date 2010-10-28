@@ -11,6 +11,8 @@
 
 #include <stdint.h> // (u)int64_t
 
+#include "tinyxml.hpp"
+
 FILE * Open_File(const std::string &filename, const std::string &mode, const bool quiet = false);
 
 class IO
@@ -59,8 +61,6 @@ class IO
 
         void Print();
 };
-
-#include <tinyxml.hpp>
 
 class ReadXML
 {
