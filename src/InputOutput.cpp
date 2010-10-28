@@ -9,6 +9,8 @@
 #include "Constants.hpp"
 #include "InputOutput.hpp"
 
+#define DEBUGP(x)  std_cout << __FILE__ << ":" << __LINE__ << ":\n    " << x;
+
 // **************************************************************
 FILE * Open_File(const std::string &filename, const std::string &mode, const bool quiet)
 {
