@@ -416,7 +416,29 @@ bool ReadXML::Get_Bool(const std::string element)
     else
     {
         std_cout
-            << "Error intepreting boolean value of '" << element << "'" << std::endl
+            << "Error interpreting boolean value of '" << element << "'" << std::endl
+            << "String read was '" << temp << "'\n" << std::flush;
+        abort();
+    }
+
+    return return_value;
+}
+
+// **************************************************************
+bool ReadXML::Get_Enable(const std::string element)
+{
+    std::string temp = Get_Attribute_String(element, "enable");
+
+    bool return_value;
+
+    if      (temp == "yes" || temp == "on")
+        return_value = true;
+    else if (temp == "no"  || temp == "off")
+        return_value = false;
+    else
+    {
+        std_cout
+            << "Error interpreting boolean 'enable' value of '" << element << "'" << std::endl
             << "String read was '" << temp << "'\n" << std::flush;
         abort();
     }

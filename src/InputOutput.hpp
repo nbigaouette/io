@@ -87,6 +87,7 @@ class ReadXML
         long int    Get_LInt(const std::string element);
         int64_t     Get_Int64(const std::string element);
         uint64_t    Get_UInt64(const std::string element);
+        bool        Get_Enable(const std::string element);
 
         double      Get_Double_Time_Second(const std::string element);
         double      Get_Double_Time_AU(const std::string element);
