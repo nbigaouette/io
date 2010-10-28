@@ -8,7 +8,7 @@
 #################################################################
 
 # Project options
-LIB             := xmlinput
+LIB             := inputoutput
 BIN              = $(LIB)_test
 SRCDIRS          = src
 SRCEXT           = cpp
