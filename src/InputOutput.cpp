@@ -388,6 +388,31 @@ TiXmlNode * ReadXML::Get_SubNode(const std::string elements)
 }
 
 // **************************************************************
+TiXmlNode * ReadXML::Get_SubNode(TiXmlNode *RootNode, const std::string &celements)
+{
+    // Temporary node
+    TiXmlNode *subnode = RootNode;
+
+    // Split the XML path string into many substrings, saved in a vector
+    std::vector<std::string> subelements;
+    Split_String(celements, '/', subelements);
+
+    for (std::vector<std::string>::iterator it = subelements.begin() ; it < subelements.end() ; it++ )
+    {
+        if (subnode == NULL)
+        {
+            std_cout
+                << "XML_Get_SubNode() failed!\n"
+                << "Element \"" << celements << "\" not found!\n" << std::flush;
+                abort();
+        }
+        // For each substrings, get the first child
+        subnode = subnode->FirstChild(it->c_str());
+    }
+
+    return subnode;
+}
+
 std::string ReadXML::Get_String(const std::string element)
 {
     std::string buff;
