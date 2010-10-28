@@ -413,6 +413,47 @@ TiXmlNode * ReadXML::Get_SubNode(TiXmlNode *RootNode, const std::string &celemen
     return subnode;
 }
 
+// **************************************************************
+TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
+                                                    const std::string &elements,
+                                                    const std::string &attribute,
+                                                    const int attribute_value)
+{
+    TiXmlNode *subnode = root->FirstChild(elements);
+
+    int int_read = -1;
+    do {
+        if (
+            subnode->ToElement()->QueryIntAttribute(attribute, &int_read)
+            != TIXML_SUCCESS
+            )
+        {
+            DEBUGP("ERROR: XML_Get_SubNode_Matching_Attribute() failed!\n");
+            std_cout
+                << "root: <" << root->Value() << "> (" << root << "), "
+                << "elements: " << elements << ", "
+                << "attribute: " << attribute << ", "
+                << "attribute_value: " << attribute_value
+                << std::endl << std::flush;
+            abort();
+        }
+    } while (
+        int_read != attribute_value &&
+        (subnode = root->IterateChildren(subnode)) != 0
+    );
+    if (subnode == NULL)
+    {
+        DEBUGP("ERROR: XML_Get_SubNode_Matching_Attribute() failed!\n");
+        std_cout << "elements = " << elements << "\n"
+                 << "attribute = " << attribute << "\n"
+                 << "attribute_value = " << attribute_value << "\n"
+                 << std::flush;
+        abort();
+    }
+    else
+        return subnode;
+}
+
 std::string ReadXML::Get_String(const std::string element)
 {
     std::string buff;
