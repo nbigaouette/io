@@ -37,6 +37,7 @@ class IO
     public:
 
         IO();
+        IO(const bool _enable);
         ~IO();
         void Init(const double _period, const std::string _filename, const bool _binary = false);
         void Set_Period(const double _period);
