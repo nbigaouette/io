@@ -71,6 +71,7 @@ IO::~IO()
 // **************************************************************
 void IO::Init(const double _period, const std::string _filename, const bool _binary)
 {
+    IO();
     Set_Period(_period);
     filename = _filename;
     binary   = _binary;
