@@ -43,6 +43,7 @@ class IO
         void Set_Filename(const std::string _full_filename);
         void Set_Filename(const std::string _path, const std::string _filename);
         void Disable();
+        void Enable();
         void Open_File(const std::string mode, const bool quiet = false, const bool _using_C_fh = false);
         void Close_File();
 

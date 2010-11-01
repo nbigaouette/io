@@ -93,6 +93,12 @@ void IO::Set_Filename(const std::string _path, const std::string _filename)
 }
 
 // **************************************************************
+void IO::Enable()
+{
+    enable = true;
+}
+
+// **************************************************************
 void IO::Disable()
 {
     enable = false;
