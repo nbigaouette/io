@@ -30,6 +30,7 @@ class IO
         std::string filename;   // File name
         char mode;              // Read or write?
         bool binary;            // Binary file?
+        bool append;            // Append to file?
 
         // Do we want to force IO at next iteration?
         bool force_at_next_iteration;

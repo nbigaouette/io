@@ -53,6 +53,7 @@ IO::IO()
     using_C_fh              = false;
     mode                    = '\0';
     binary                  = false;
+    append                  = false;
 }
 
 // **************************************************************
@@ -134,6 +135,12 @@ void IO::Open_File(const std::string full_mode, const bool quiet, const bool _us
     {
         std_cout << "ERROR: Unknown mode '" << full_mode << "'. Exiting.\n";
         abort();
+    }
+
+    if (full_mode.find("a") != std::string::npos)
+    {
+        append = true;
+        file_openmode |= std::fstream::app;
     }
 
     if (full_mode.find("b") != std::string::npos)
