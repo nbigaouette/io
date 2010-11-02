@@ -22,6 +22,7 @@ class IO
 
         double period;          // Period of saving
         double last_saved_time; // Last time which forced a save
+        uint64_t nb_saved;      // Number of times saved
 
         std::fstream fh;        // C++ File handle
         FILE *C_fh;             // Alternate C file handle
@@ -48,6 +49,7 @@ class IO
         void Enable();
         void Open_File(const std::string mode, const bool quiet = false, const bool _using_C_fh = false);
         void Close_File();
+        uint64_t Get_Nb_Saved() { return nb_saved; }
 
         inline bool             Is_Enable()                 { return enable;    }
         inline bool             Is_Open()                   { return (using_C_fh ? ((C_fh != NULL) ? true : false ) : (fh.is_open() ? true : false)); }

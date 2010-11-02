@@ -49,6 +49,7 @@ IO::IO()
     enable                  = false;
     period                  = 0.0;
     last_saved_time         = 0.0;
+    nb_saved                = 0;
     C_fh                    = NULL;
     using_C_fh              = false;
     mode                    = '\0';
@@ -207,16 +208,23 @@ bool IO::Is_Output_Permitted(const double time, const bool dont_set_previous_per
     {
         std_cout << "Output forced...\n";
         force_at_next_iteration = false;
+        nb_saved++;
         return true;
     }
 
     // Initial save (time == 0.0)
     if (time < 1.0e-10)
+    {
+        nb_saved++;
         return true;
+    }
 
     // Period of -1 means always save
     if (-1.001 < period && period < -0.999)
+    {
+        nb_saved++;
         return true;
+    }
 
     // Period of -2 means is handled elsewhere. Used to force
     // output only when ionization occured.
@@ -232,7 +240,10 @@ bool IO::Is_Output_Permitted(const double time, const bool dont_set_previous_per
     if (time_previous_period > last_saved_time)
     {
         if (!dont_set_previous_period)
+        {
+            nb_saved++;
             last_saved_time = time_previous_period;
+        }
         return true;
     }
 
