@@ -46,14 +46,15 @@ inline std::string Pause(std::string msg = std::string(""))
 // **************************************************************
 IO::IO()
 {
+    enable                  = false;
     period                  = 0.0;
     last_saved_time         = 0.0;
-    force_at_next_iteration = false;
-    enable                  = false;
+    C_fh                    = NULL;
     using_C_fh              = false;
     mode                    = '\0';
     binary                  = false;
     append                  = false;
+    force_at_next_iteration = false;
 }
 
 // **************************************************************
