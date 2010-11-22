@@ -213,7 +213,8 @@ bool IO::Is_Output_Permitted(const double time, const bool dont_set_previous_per
     }
 
     // Initial save (time == 0.0)
-    if (time < 1.0e-10)
+    // FLT_MIN ~ 10^-38
+    if (time < 1.0e-36)
     {
         nb_saved++;
         return true;
