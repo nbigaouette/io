@@ -869,6 +869,7 @@ double ReadXML::Factor_Unit_To_Second(const std::string element)
     double unit_factor = 0.0;
 
     if      (unit == "au")  unit_factor = libtinyxml::au_to_si_time;
+    else if (unit == "zs")  unit_factor = libtinyxml::zs_to_s;
     else if (unit == "as")  unit_factor = libtinyxml::as_to_s;
     else if (unit == "fs")  unit_factor = libtinyxml::fs_to_s;
     else if (unit == "ps")  unit_factor = libtinyxml::ps_to_s;
@@ -881,7 +882,7 @@ double ReadXML::Factor_Unit_To_Second(const std::string element)
         std_cout
             << "Error in reading XML input file:\n"
             << "Unit of " << element << " needs to be either:\n"
-            << "    au\n    as\n    fs\n    ps\n    ns\n    mus\n    ms\n    s\n"
+            << "    au\n    zs\n    as\n    fs\n    ps\n    ns\n    mus\n    ms\n    s\n"
             << "Aborting\n";
         abort();
     }
