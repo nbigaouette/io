@@ -120,6 +120,8 @@ namespace libtinyxml
     const double bohr_to_angstrom = bohr_to_m * m_to_angstrom;  // Å . bohr^-1
     const double angstrom_to_bohr = one / bohr_to_angstrom;     // bohr . Å^-1
 
+    const double zs_to_s        = double(1.0e-21);              // s . zs^-1
+    const double s_to_zs        = one / zs_to_s;        // zs . s^-1
     const double as_to_s        = double(1.0e-18);              // s . as^-1
     const double s_to_as        = one / as_to_s;        // as . s^-1
     const double fs_to_s        = double(1.0e-15);              // s . fs^-1
