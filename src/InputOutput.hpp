@@ -47,7 +47,9 @@ class IO
         void Set_Filename(const std::string _path, const std::string _filename);
         void Disable();
         void Enable();
-        void Open_File(const std::string mode, const bool quiet = false, const bool _using_C_fh = false);
+        bool Open_File(const std::string mode, const bool quiet = false,
+                       const bool _using_C_fh = false,
+                       const bool check_if_file_exists = true);
         void Close_File();
         uint64_t Get_Nb_Saved() { return nb_saved; }
 

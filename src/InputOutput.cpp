@@ -116,7 +116,8 @@ void IO::Disable()
 }
 
 // **************************************************************
-void IO::Open_File(const std::string full_mode, const bool quiet, const bool _using_C_fh)
+bool IO::Open_File(const std::string full_mode, const bool quiet,
+                   const bool _using_C_fh, const bool check_if_file_exists)
 {
     assert(enable);
 
@@ -164,13 +165,17 @@ void IO::Open_File(const std::string full_mode, const bool quiet, const bool _us
             // Verify that the file is opened.
             if (C_fh == NULL)
             {
-                std::cerr << "Could not open file \"" << filename << "\" for '" << full_mode << "'...\n";
-                std::string answer = Pause("Retry? [y/N]");
-                if (! (answer == "y" || answer == "yes"))
+                if (check_if_file_exists)
                 {
-                    std_cout << std::flush;
-                    abort();
-                }
+                    std::cerr << "Could not open file \"" << filename << "\" for '" << full_mode << "'...\n";
+                    std::string answer = Pause("Retry? [y/N]");
+                    if (! (answer == "y" || answer == "yes"))
+                    {
+                        std_cout << std::flush;
+                        abort();
+                    }
+                } else
+                    return false;
             } else {
                 retry = false;
             }
@@ -180,18 +185,24 @@ void IO::Open_File(const std::string full_mode, const bool quiet, const bool _us
             // Verify that the file is opened.
             if (!fh.is_open())
             {
-                std::cerr << "Could not open file \"" << filename << "\" for '" << full_mode << "'...\n";
-                std::string answer = Pause("Retry? [y/N]");
-                if (! (answer == "y" || answer == "yes"))
+                if (check_if_file_exists)
                 {
-                    std_cout << std::flush;
-                    abort();
-                }
+                    std::cerr << "Could not open file \"" << filename << "\" for '" << full_mode << "'...\n";
+                    std::string answer = Pause("Retry? [y/N]");
+                    if (! (answer == "y" || answer == "yes"))
+                    {
+                        std_cout << std::flush;
+                        abort();
+                    }
+                } else
+                    return false;
             } else {
                 retry = false;
             }
         }
     }
+
+    return true;
 }
 
 // **************************************************************
