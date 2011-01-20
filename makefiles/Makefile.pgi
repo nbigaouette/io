@@ -13,9 +13,11 @@ OMP_CFLAGS      := -mp
 OMP_LDFLAGS     := -mp
 
 # Include dirs for defective pgi
-ifeq ($(host),dld830)
-CFLAGS          += -I/opt/pgi-workstation/linux86-64/7.1-6/include
-endif
+CFLAGS          += -I/opt/pgi/linux86-64/9.0-1/include
+# ifeq ($(host),dld830)
+# CFLAGS          += -I/opt/pgi-workstation/linux86-64/7.1-6/include
+# endif
+
 ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
 CFLAGS          += -I$(HOME)/usr/include
 endif
