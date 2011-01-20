@@ -13,8 +13,8 @@
 #include <boost/cstdint.hpp>
 using namespace boost;
 #else
-// #include <stdint.h> // (u)int64_t
-#include <cstdint>
+#include <stdint.h> // (u)int64_t
+// #include <cstdint> // requires C++0x
 #endif // #ifdef __PGI
 
 
