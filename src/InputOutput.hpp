@@ -9,7 +9,14 @@
 #include <netcdfcpp.h>
 #endif // #ifdef NETCDF
 
-#include <stdint.h> // (u)int64_t
+#ifdef __PGI
+#include <boost/cstdint.hpp>
+using namespace boost;
+#else
+// #include <stdint.h> // (u)int64_t
+#include <cstdint>
+#endif // #ifdef __PGI
+
 
 #include "tinyxml.hpp"
 
