@@ -134,16 +134,15 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
         mode = 'r';
         file_openmode = std::fstream::in;
     }
+    else if (full_mode.find("a") != std::string::npos)
+    {
+        append = true;
+        file_openmode |= std::fstream::app;
+    }
     else
     {
         std_cout << "ERROR: Unknown mode '" << full_mode << "'. Exiting.\n";
         abort();
-    }
-
-    if (full_mode.find("a") != std::string::npos)
-    {
-        append = true;
-        file_openmode |= std::fstream::app;
     }
 
     if (full_mode.find("b") != std::string::npos)
