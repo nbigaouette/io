@@ -176,6 +176,16 @@ define LDFLAGS_template
     endif
 endef
 
+#################################################################
+# This is a "template", acting like a function.
+# It will add to both the CFLAGS and the LDFLAGS the right path to a library.
+# To use, include a similar line in the main Makefile:
+# $(eval $(call Flags_template,stdcout,StdCout.hpp),ssh://optimusprime.selfip.net/git/nicolas/stdcout.git)
+define Flags_template
+$(eval $(call CFLAGS_template,$(1),$(2),$(3)))
+$(eval $(call LDFLAGS_template,$(1),$(2),$(3)))
+endef
+
 
 #################################################################
 # Tools
