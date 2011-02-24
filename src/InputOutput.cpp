@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>  // setw() & setfill()
 #include <cmath>    // std::abs()
+#include <limits>   // std::numeric_limits<>::max()
 
 #include <StdCout.hpp>
 
@@ -651,6 +652,16 @@ double ReadXML::Get_Double(const std::string element, TiXmlNode *subnode)
 int ReadXML::Get_Int(const std::string element, TiXmlNode *subnode)
 {
     return atoi(Get_String(element, subnode).c_str());
+}
+
+// **************************************************************
+unsigned int ReadXML::Get_UInt(const std::string element, TiXmlNode *subnode)
+{
+    // By reading a 64-bit int, we make sure it does not overflow
+    // the unsigned value. Then we cast and return.
+    int64_t tmp = Get_Int64(element, subnode);
+    assert(tmp < int64_t(std::numeric_limits<unsigned int>::max()));
+    return (unsigned int)(tmp);
 }
 
 // **************************************************************

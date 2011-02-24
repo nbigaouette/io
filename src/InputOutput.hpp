@@ -97,6 +97,7 @@ class ReadXML
         bool        Get_Bool(   const std::string element, TiXmlNode *subnode = NULL);
         double      Get_Double( const std::string element, TiXmlNode *subnode = NULL);
         int         Get_Int(    const std::string element, TiXmlNode *subnode = NULL);
+        unsigned int Get_UInt(  const std::string element, TiXmlNode *subnode = NULL);
         long int    Get_LInt(   const std::string element, TiXmlNode *subnode = NULL);
         int64_t     Get_Int64(  const std::string element, TiXmlNode *subnode = NULL);
         uint64_t    Get_UInt64( const std::string element, TiXmlNode *subnode = NULL);
