@@ -36,7 +36,7 @@ distribution.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+// #include <assert.h>
 
 // Help out windows:
 #if defined( _DEBUG ) && !defined( DEBUG )
