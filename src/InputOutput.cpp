@@ -924,4 +924,27 @@ double ReadXML::Factor_Unit_To_Time_AU(const std::string element)
     return libtinyxml::si_to_au_time * Factor_Unit_To_Second(element);
 }
 
+// **************************************************************
+double ReadXML::Factor_Unit_To_Intensity_AU(const std::string element)
+{
+    const std::string unit = Get_Unit(element);
+    double unit_factor = 0.0;
+
+    if      (unit == "W/cm^2")  unit_factor = (libtinyxml::si_to_au_energy / (pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
+    else if (unit == "W.cm-^2") unit_factor = (libtinyxml::si_to_au_energy / (pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
+    else if (unit == "W/m^2")   unit_factor = (libtinyxml::si_to_au_energy / (pow(                    libtinyxml::m_to_bohr, 2)));
+    else if (unit == "W.m-^2")  unit_factor = (libtinyxml::si_to_au_energy / (pow(                    libtinyxml::m_to_bohr, 2)));
+    else
+    {
+        std_cout
+            << "Error in reading XML input file:\n"
+            << "Unit of " << element << " needs to be either:\n"
+            << "    W/cm^2\n    W.cm-^2\n    W/m^2\n    W.m-^2\n"
+            << "Aborting\n";
+        abort();
+    }
+
+    return unit_factor;
+}
+
 // ********** End of file ***************************************

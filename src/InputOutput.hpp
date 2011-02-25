@@ -159,6 +159,7 @@ class ReadXML
         double      Factor_Unit_To_Second(      const std::string element);
         double      Factor_Unit_To_Length_AU(   const std::string element);
         double      Factor_Unit_To_Time_AU(     const std::string element);
+        double      Factor_Unit_To_Intensity_AU(const std::string element);
 };
 
 #endif // INC_CLASSES_IO_hpp
