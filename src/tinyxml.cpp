@@ -337,7 +337,7 @@ bool TiXmlNode::RemoveChild( TiXmlNode* removeThis )
 	if ( removeThis->parent != this )
 	{	
 		assert( 0 );
-		return false;
+		//return false;
 	}
 
 	if ( removeThis->next )
