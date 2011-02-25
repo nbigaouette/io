@@ -587,7 +587,16 @@ std::string ReadXML::Get_String(const std::string element, TiXmlNode *subnode)
     std::string buff;
 
     if (subnode != NULL)
-        buff = std::string(subnode->FirstChild()->Value());
+    {
+        if (subnode->FirstChild() != NULL)
+            buff = std::string(subnode->FirstChild()->Value());
+        else
+        {
+            std_cout << "ReadXML::Get_String() failed!\n";
+            std_cout << "Element \"" << element << "\" is empty!\n" << std::flush;
+            abort();
+        }
+    }
     else
     {
         std_cout << "ReadXML::Get_String() failed!\n";
