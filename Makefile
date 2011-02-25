@@ -31,6 +31,7 @@ CFLAGS          += -DTIXML_USE_STL
 
 
 $(eval $(call Flags_template,stdcout,StdCout.hpp,ssh://optimusprime.selfip.net/git/nicolas/stdcout.git))
+$(eval $(call CFlags_template,assert,Assert.hpp,ssh://optimusprime.selfip.net/git/nicolas/assert.git))
 
 ### Just build "full" and install
 .PHONY: f
