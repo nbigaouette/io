@@ -20,6 +20,10 @@ using namespace boost;
 
 #include "tinyxml.hpp"
 
+void Print_Double_in_Binary(double d);
+void Print_Double_in_Binary(float d);
+
+
 FILE * Open_File(const std::string &filename, const std::string &mode, const bool quiet = false);
 
 class IO
