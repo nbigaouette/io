@@ -64,6 +64,8 @@ class IO
         void Close_File();
         uint64_t Get_Nb_Saved() { return nb_saved; }
 
+        void Write(const char *p, size_t size);
+
         inline bool             Is_Enable()                 { return enable;    }
         inline bool             Is_Open()                   { return (using_C_fh ? ((C_fh != NULL) ? true : false ) : (fh.is_open() ? true : false)); }
         inline std::fstream&    Fh()                        { return fh;        }

@@ -339,6 +339,22 @@ void IO::Close_File()
 }
 
 // **************************************************************
+void IO::Write(const char *p, size_t size)
+{
+    if (using_C_fh)
+    {
+        abort();
+    }
+    else
+    {
+        assert(Is_Open());
+        assert(Is_Enable());
+
+        fh.write(p, size);
+    }
+}
+
+// **************************************************************
 void IO::Flush()
 {
     if (using_C_fh)
