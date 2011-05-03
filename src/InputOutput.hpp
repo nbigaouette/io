@@ -76,6 +76,8 @@ class IO
         inline double           Get_Period()                { return period;    }
         inline void             Force_At_Next_Iteration()   { force_at_next_iteration = true; }
         inline void             Disable_At_Next_Iteration() { disable_at_next_iteration = true; }
+        inline bool             Is_Forced_At_Next_Iteration()   { return (force_at_next_iteration ? true : false);   }
+        inline bool             Is_Disabled_At_Next_Iteration() { return (disable_at_next_iteration ? true : false); }
 
         void Flush();
         void Format(const int width, const int nb_after_dot, const char type, const char justify='r', const char fill=' ');
