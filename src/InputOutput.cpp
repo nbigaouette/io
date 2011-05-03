@@ -286,7 +286,7 @@ bool IO::Is_Output_Permitted(const double time, const bool dont_set_previous_per
 
     if (force_at_next_iteration)
     {
-        std_cout << "Output forced...\n";
+        std_cout << "Output forced for " << filename << "...\n";
         force_at_next_iteration = false;
         nb_saved++;
         return true;
