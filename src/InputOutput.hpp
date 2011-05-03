@@ -46,6 +46,8 @@ class IO
 
         // Do we want to force IO at next iteration?
         bool force_at_next_iteration;
+        // Do we want to disable IO at next iteration?
+        bool disable_at_next_iteration;
 
     public:
 
@@ -73,6 +75,7 @@ class IO
         inline std::string      Get_Filename()              { return filename;  }
         inline double           Get_Period()                { return period;    }
         inline void             Force_At_Next_Iteration()   { force_at_next_iteration = true; }
+        inline void             Disable_At_Next_Iteration() { disable_at_next_iteration = true; }
 
         void Flush();
         void Format(const int width, const int nb_after_dot, const char type, const char justify='r', const char fill=' ');

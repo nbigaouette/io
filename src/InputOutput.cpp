@@ -119,6 +119,7 @@ IO::IO()
     binary                  = false;
     append                  = false;
     force_at_next_iteration = false;
+    disable_at_next_iteration = false;
 }
 
 // **************************************************************
@@ -276,6 +277,12 @@ bool IO::Is_Output_Permitted(const double time, const bool dont_set_previous_per
 {
     if (!enable)
         return false;
+
+    if (disable_at_next_iteration)
+    {
+        disable_at_next_iteration = false;
+        return false;
+    }
 
     if (force_at_next_iteration)
     {
