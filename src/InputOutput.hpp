@@ -5,10 +5,6 @@
 #include <vector>
 #include <fstream>
 
-#ifdef NETCDF
-#include <netcdfcpp.h>
-#endif // #ifdef NETCDF
-
 #ifdef __PGI
 #include <boost/cstdint.hpp>
 using namespace boost;
