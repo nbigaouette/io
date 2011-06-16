@@ -14,7 +14,10 @@
 #define DEBUGP(x)  std_cout << __FILE__ << ":" << __LINE__ << ":\n    " << x;
 
 
+#ifdef COMPRESS_OUTPUT
+#include <zlib.h>
 #define DEFAULT_BUFFER_SIZE 8192
+#endif // #ifdef COMPRESS_OUTPUT
 
 
 // **************************************************************
@@ -123,6 +126,7 @@ void IO::Clear()
     append                  = false;
     force_at_next_iteration = false;
     disable_at_next_iteration = false;
+    compressed_fh           = NULL;
 
 // **************************************************************
 IO::IO()
@@ -207,17 +211,6 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
         mode = 'r';
         file_openmode = std::fstream::in;
     }
-    else if (full_mode.find("z") != std::string::npos)
-    {
-#ifdef COMPRESS_OUTPUT
-        compressed = compressed_file;
-        filename += ".gz";
-#else // #ifdef COMPRESS_OUTPUT
-        // If library not compiled with compression, disable flag.
-        compressed = false;
-        std_cout << "Compression for file '" << filename << "' disabled. Please compile io.git with -DCOMPRESS_OUTPUT if you want compression.\n";
-#endif // #ifdef COMPRESS_OUTPUT
-    }
     else if (full_mode.find("a") != std::string::npos)
     {
         append = true;
@@ -227,6 +220,18 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
     {
         std_cout << "ERROR: Unknown mode '" << full_mode << "'. Exiting.\n";
         abort();
+    }
+    
+    if (full_mode.find("z") != std::string::npos)
+    {
+#ifdef COMPRESS_OUTPUT
+        compressed = true;
+        filename += ".gz";
+#else // #ifdef COMPRESS_OUTPUT
+        // If library not compiled with compression, disable flag.
+        compressed = false;
+        std_cout << "Compression for file '" << filename << "' disabled. Please compile io.git with -DCOMPRESS_OUTPUT if you want compression.\n";
+#endif // #ifdef COMPRESS_OUTPUT
     }
 
     if (full_mode.find("b") != std::string::npos)
@@ -244,8 +249,10 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
         if (Is_Compressed())
         {
 #ifdef COMPRESS_OUTPUT
-            compressed_fh = gzopen(filename.c_str(), "wb");
-            gzbuffer(compressed_fh, DEFAULT_BUFFER_SIZE);
+            gzFile tmp_file = gzopen(filename.c_str(), "wb");
+            gzbuffer(tmp_file, DEFAULT_BUFFER_SIZE);
+            compressed_fh = (void *) tmp_file;
+            retry = false;
 #endif // #ifdef COMPRESS_OUTPUT
         }
         else if (using_C_fh)
@@ -361,7 +368,13 @@ bool IO::Is_Output_Permitted(const double time, const bool dont_set_previous_per
 // **************************************************************
 void IO::Close_File()
 {
-    if (using_C_fh)
+    if (Is_Compressed())
+    {
+        if (compressed_fh != NULL)
+            gzclose((gzFile *) compressed_fh);
+        compressed_fh = NULL;
+    }
+    else if (using_C_fh)
     {
         if (C_fh != NULL)
             fclose(C_fh);
@@ -375,7 +388,14 @@ void IO::Close_File()
 // **************************************************************
 void IO::Write(const char *p, size_t size)
 {
-    if (using_C_fh)
+    if (Is_Compressed())
+    {
+#ifdef COMPRESS_OUTPUT    
+        const int error_code = gzwrite(compressed_fh, p, size);
+        assert(error_code != 0);
+#endif // #ifdef COMPRESS_OUTPUT
+    }
+    else if (using_C_fh)
     {
         abort();
     }

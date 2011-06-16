@@ -15,11 +15,6 @@ using namespace boost;
 
 #include "tinyxml.hpp"
 
-#ifdef COMPRESS_OUTPUT
-#include <zlib.h>
-#endif // #ifdef COMPRESS_OUTPUT
-
-
 void Print_Double_in_Binary(double d);
 void Print_Double_in_Binary(float d);
 
@@ -39,9 +34,7 @@ class IO
         std::fstream fh;        // C++ File handle
         FILE *C_fh;             // Alternate C file handle
         bool using_C_fh;
-#ifdef COMPRESS_OUTPUT
-        gzFile compressed_fh;
-#endif // #ifdef COMPRESS_OUTPUT
+        void *compressed_fh;
 
         std::string filename;   // File name
         char mode;              // Read or write?
