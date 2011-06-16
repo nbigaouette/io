@@ -69,7 +69,7 @@ class IO
 
         inline bool             Is_Enable()                 { return enable;    }
         inline bool             Is_Compressed()             { return compressed;    }
-        inline bool             Is_Open()                   { return (using_C_fh ? ((C_fh != NULL) ? true : false ) : (fh.is_open() ? true : false)); }
+        inline bool             Is_Open()                   { return (compressed_fh != NULL ? true : (using_C_fh ? ((C_fh != NULL) ? true : false ) : (fh.is_open() ? true : false))); }
         inline std::fstream&    Fh()                        { return fh;        }
         inline FILE *           C_Fh()                      { return C_fh;      }
         inline std::string      Get_Filename()              { return filename;  }
