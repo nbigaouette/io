@@ -395,6 +395,9 @@ void IO::Close_File()
 // **************************************************************
 void IO::Write(const char *p, size_t size)
 {
+    assert(Is_Open());
+    assert(Is_Enable());
+
     if (Is_Compressed())
     {
 #ifdef COMPRESS_OUTPUT    
@@ -408,9 +411,6 @@ void IO::Write(const char *p, size_t size)
     }
     else
     {
-        assert(Is_Open());
-        assert(Is_Enable());
-
         fh.write(p, size);
     }
 }
