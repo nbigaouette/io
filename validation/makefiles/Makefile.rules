@@ -1,0 +1,453 @@
+#################################################################
+# Generic makefile
+# Nicolas Bigaouette, July 2008
+#################################################################
+
+host=$(shell uname -n)
+arch=$(shell uname -m)
+os=$(shell uname)
+whoami = "whoami"
+ifeq ($(os),SunOS)
+    GNU = g
+    ifeq ($(wildcard /usr/ucb/whoami),/usr/ucb/whoami)
+        user=$(shell /usr/ucb/whoami)
+    endif
+    ifeq ($(wildcard /usr/gnu/bin/whoami),/usr/gnu/bin/whoami)
+        user=$(shell /usr/gnu/bin/whoami)
+    endif
+endif
+user=$(shell $(whoami) )
+PWD=$(shell pwd)
+comma:= ,
+column:= :
+empty:=
+space:= $(empty) $(empty)
+
+build_dir        = build
+
+HEADERS          = $(wildcard $(addsuffix *.$(HEADEXT),$(addsuffix /, $(SRCDIRS)) ) )
+
+HPCVL_MACHINES   = sflogin xenakis
+SHARCNET_MACHINES= bul narwhal wha hnd bal
+
+#################################################################
+# Force printing of help if just "make" is called
+include makefiles/Makefile.help
+
+#################################################################
+# Call "make sharcnet" for building SHARCNET
+ifneq ($(filter sharcnet, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.sharcnet
+endif
+#################################################################
+# Call "make gcc" for building using GCC (gcc or g++)
+ifneq ($(filter gcc, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.gcc
+endif
+#################################################################
+# Call "make gcc" for building using LLVM's Clang (clang or clang++)
+ifneq ($(filter clang, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.clang
+endif
+#################################################################
+# Call "make intel" for building using icc (Intel's C compiler)
+ifneq ($(filter intel, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.intel
+endif
+#################################################################
+# Call "make pgi" for building using pgcc (Portland Group's compiler)
+ifneq ($(filter pgi, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.pgi
+endif
+#################################################################
+# Call "make pathscale" for building using pathCC (Pathscale's compiler)
+ifneq ($(filter pathscale, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.pathscale
+endif
+#################################################################
+# Call "make sun" for building using sunCC (Sun Studio 12)
+ifneq ($(filter sun, $(MAKECMDGOALS) ),)
+    include makefiles/Makefile.sunstudio
+endif
+
+#################################################################
+# Call "make ds" to include debug symbols (-g)
+ifneq ($(filter ds, $(MAKECMDGOALS) ),)
+    CFLAGS      += -g
+endif
+#################################################################
+# Call "make mpi" for MPI compilation
+ifneq ($(filter mpi, $(MAKECMDGOALS) ),)
+    CFLAGS      += -DPARALLEL_MPI
+ifeq ($(filter pathscale, $(MAKECMDGOALS) ),)
+    CPP         := $(MPILOC)mpiCC
+    CC          := $(MPILOC)mpicc
+    ifeq ($(host)),cerberus)
+        CFLAGS  += -DMP_Lite -I$(HOME)/usr/include/
+        LDFLAGS += $(HOME)/usr/lib/libmplite.a
+    endif
+endif
+endif
+#################################################################
+# Call "make omp" for OpenMP compilation
+ifneq ($(filter omp, $(MAKECMDGOALS) ),)
+    CFLAGS      += -DPARALLEL_OMP
+    CFLAGS      += $(OMP_CFLAGS)
+    LDFLAGS     += $(OMP_LDFLAGS)
+endif
+#################################################################
+# Call "make ocl" for OpenCL compilation
+ifneq ($(filter ocl, $(MAKECMDGOALS) ),)
+    USE_OPENCL       = "yes"
+    CFLAGS          += -DGPGPU_OPENCL
+    ifeq ($(os), Darwin)
+        #CFLAGS      += -I"/Developer/GPU Computing/OpenCL/common/inc"
+        LDFLAGS     += -framework OpenCL
+    else
+        LDFLAGS     += -lOpenCL
+    endif
+endif
+#################################################################
+
+COMPILER    := $(CC)
+ifeq ($(LANGUAGE),CPP)
+COMPILER    := $(CPP)
+endif
+LD          := $(COMPILER)
+
+SOURCES          = $(subst $(SRCDIRS)/,,$(foreach DIR,$(SRCDIRS) .,$(wildcard $(DIR)/*.$(SRCEXT) ) ) )
+NAMES            = $(subst .$(SRCEXT),,$(SOURCES) )
+BASENAMES        = $(notdir $(NAMES) )
+OBJ              = $(addprefix $(build_dir)/,$(addsuffix .o, $(BASENAMES) ) )
+
+INCLUDES         = $(addprefix -I./, $(SRCDIRS) )
+LDFLAGS         += -L./$(build_dir)
+
+ifeq ($(os), Darwin)
+CFLAGS          += -DMACOSX
+endif
+
+#################################################################
+# This is a "template", acting like a function.
+# It will add to the CFLAGS the right path to a library.
+# To use, include a similar line in the main Makefile:
+# $(eval $(call CFLAGS_template,stdcout,StdCout.hpp),ssh://optimusprime.selfip.net/git/nicolas/stdcout.git)
+define CFLAGS_template
+    $(1)_include_home      := $(HOME)/usr/include
+    $(1)_include_home_name := $(HOME)/usr/include/$(1)
+    $(1)_include_usr       := /usr/include
+    $(1)_include_usr_name  := /usr/include/$(1)
+
+    ifneq ($$(wildcard $$($(1)_include_home)/$(2)),)
+        $(1)_Include := $$($(1)_include_home)
+    else
+        ifneq ($$(wildcard $$($(1)_include_home_name)/$(2)),)
+            $(1)_Include := $$($(1)_include_home_name)
+        else
+            ifneq ($$(wildcard $$($(1)_include_usr)/$(2)),)
+                $(1)_Include := $$($(1)_include_usr)
+            else
+                ifneq ($$(wildcard $$($(1)_include_usr_name)/$(2)),)
+                    $(1)_Include := $$($(1)_include_usr_name)
+                else
+                    $$(error Couldn't find header $(2) in either $$($(1)_include_home), $$($(1)_include_home_name), $$($(1)_include_usr) or $$($(1)_include_usr_name)! Get it at $(3))
+                    endif
+            endif
+        endif
+    endif
+    CFLAGS += -I$$($(1)_Include)
+endef
+
+#################################################################
+# This is a "template", acting like a function.
+# It will add to the LDFLAGS the right path to a library.
+# To use, include a similar line in the main Makefile:
+# $(eval $(call LDFLAGS_template,stdcout,StdCout.hpp),ssh://optimusprime.selfip.net/git/nicolas/stdcout.git)
+define LDFLAGS_template
+    usr_lib                := $(subst /gcc,,/usr/lib/$(DESTDIRCOMPILER))
+
+    $(1)_lib_home          := $(HOME)$$(usr_lib)
+    $(1)_lib_home_name     := $(HOME)$$(usr_lib)/$(1)
+    $(1)_lib_usr           := $$(usr_lib)
+    $(1)_lib_usr_name      := $$(usr_lib)/$(1)
+
+    ifneq ($$(wildcard $$($(1)_lib_home)/lib$(1).so),)
+        $(1)_LibDir := $$($(1)_lib_home)
+    else
+        ifneq ($$(wildcard $$($(1)_lib_home_name)/lib$(1).so),)
+            $(1)_LibDir := $$($(1)_lib_home_name)
+        else
+            ifneq ($$(wildcard $$($(1)_lib_usr)/lib$(1).so),)
+                $(1)_LibDir := $$($(1)_lib_usr)
+            else
+                ifneq ($$(wildcard $$($(1)_lib_usr_name)/lib$(1).so),)
+                    $(1)_LibDir := $$($(1)_lib_usr_name)
+                else
+                    $$(error Couldn't find library lib$(1).so in either $$($(1)_lib_home), $$($(1)_lib_home_name), $$($(1)_lib_usr) or $$($(1)_lib_usr_name)! Get it at $(3))
+                endif
+            endif
+        endif
+    endif
+
+   ifeq ($$(os),Darwin)
+       MyLibs += $$($(1)_LibDir)/lib$(1).a
+       #MyLibs += -framework $(1)
+       #MyLibs_Path += -F$$($(1)_LibDir) $(RPATH)$$($(1)_LibDir)
+   else
+        ifeq ($(LINK_PREFERED),static)
+             MyLibs += $$($(1)_LibDir)/lib$(1).a
+        else  # ifeq ($(LINK_PREFERED),static)
+            ifeq ($(LINK_PREFERED),shared)
+                MyLibs += -L$$($(1)_LibDir) $(RPATH)$$($(1)_LibDir) -l$(1)
+            else  # ifeq ($(LINK_PREFERED),shared)
+                $$(error Please define LINK_PREFERED=static or LINK_PREFERED=shared in main Makefile, before the "include makefiles/Makefile.rules" directive.)
+            endif # ifeq ($(LINK_PREFERED),shared)
+        endif # ifeq ($(LINK_PREFERED),static)
+   endif
+endef
+
+#################################################################
+# This is a "template", acting like a function.
+# It will add to both the CFLAGS and the LDFLAGS the right path to a library.
+# To use, include a similar line in the main Makefile:
+# $(eval $(call Flags_template,stdcout,StdCout.hpp),ssh://optimusprime.selfip.net/git/nicolas/stdcout.git)
+define Flags_template
+$(eval $(call CFLAGS_template,$(1),$(2),$(3)))
+$(eval $(call LDFLAGS_template,$(1),$(2),$(3)))
+endef
+
+ifneq ($(LD_LIBRARY_PATH),)
+ifeq ($(LINK_PREFERED),shared)
+# Make sure the resulting binary will know the exact path of the shared libraries.
+LD_LIBRARY_PATHs = $(subst :, ,$(LD_LIBRARY_PATH) )
+ifneq ($(RPATH),)
+LDFLAGS += $(strip $(sort $(addprefix $(RPATH), $(LD_LIBRARY_PATHs))))
+endif
+endif
+endif
+
+#################################################################
+# Tools
+SOFTLIMIT        = softlimit -a 500000000
+RM               = rm -f
+CONSOLE          = xterm -hold -e
+#CONSOLE          = konsole --vt_sz 73x41 --noclose -e
+#CONSOLE          = konsole --vt_sz 73x41 --noclose -e
+#CONSOLE            = konsole --noclose -e
+DEBUGGER         = gdb --quiet --args
+VALGRIND         = valgrind
+MEMCHECK         = $(VALGRIND) --tool=memcheck --leak-check=full --show-reachable=yes
+CACHEGRIND       = $(VALGRIND) --tool=callgrind
+GIT              = git
+GREP             = grep
+SED              = sed
+ifeq ($(NP),)
+ifneq ($(np),)
+NP=$(np)
+endif
+endif
+NP ?= 2
+ifneq ($(NAME),)
+NAME_ARGUMENT   = --name $(NAME)
+endif
+ifneq ($(INPUT),)
+INPUT_ARGUMENT  = --input $(INPUT)
+endif
+ifneq ($(ARGS),)
+OTHER_ARGUMENT  = $(ARGS)
+endif
+#################################################################
+
+ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
+GREP            := ggrep
+SED             := gsed
+endif
+
+.PHONY: a b l all
+a: all
+b: all
+l: all
+all: $(BIN)
+
+.PHONY: o
+o: $(OBJ)
+
+# Git revision is saved in src/Version.cpp. Only used for Git.
+#GIT_BRANCH := $(shell $(GIT) branch --no-color| $(GREP) "*" | $(SED) "s|* ||g")
+#.PHONE: version
+#version: src/Version.cpp
+#src/Version.cpp: force
+#	echo "#include \"Version.hpp\"" > src/Version.cpp
+#	echo "const char *build_sha = \"`$(GIT) rev-parse HEAD`\";" >> src/Version.cpp
+#	echo "const char *build_branch = \"$(GIT_BRANCH)\";" >> src/Version.cpp
+#	echo "const char *build_time = \"`date`\";" >> src/Version.cpp
+# Git revision is saved in src/Version.cpp. Only used for Git.
+
+#################################################################
+# Call "make test" for building test suite
+VPATH            = $(subst $(space),$(column),$(SRCDIRS) ):$(subst $(space),$(column),$(TESTDIRS) )
+TEST_SOURCES     = $(foreach DIR,$(TESTDIRS) .,$(wildcard $(DIR)/*.$(SRCEXT) ) )
+TEST_NAMES       = $(notdir $(subst .$(SRCEXT),,$(TEST_SOURCES) ) )
+TEST_OBJ         = $(addprefix $(build_dir)/,$(addsuffix .o, $(TEST_NAMES) ) )
+TEST_BIN         = $(BIN)_testing
+TEST_CFLAGS      =
+TEST_LDFLAGS     = -lboost_unit_test_framework
+
+ifneq ($(filter test, $(MAKECMDGOALS) ),)
+# Redefine the old binary target as being "empty"
+.PHONY: $(BIN)
+# Add testing components to compilation flags
+BIN             := $(BIN)_testing
+CFLAGS          := $(CFLAGS) $(TEST_CFLAGS)
+LDFLAGS         := $(LDFLAGS) $(TEST_LDFLAGS)
+# Make sure Main.o does not appear in the objects files since the unit testing already contains a main()
+OBJ             := $(subst $(build_dir)/Main.o,,$(OBJ)) $(TEST_OBJ)
+endif
+
+# Phony target for testing
+.PHONY: t test testing
+t: testing
+test: testing
+testing: $(BIN)
+
+# Linking
+#$(BIN): version $(OBJ) cb
+$(BIN): $(OBJ) cb
+	# ################################################################
+	# Linking...
+	# ################################################################
+	$(LD) $(strip $(CFLAGS) $(OBJ) -o $(BIN) $(LDFLAGS) $(sort $(MyLibs_Path)) $(MyLibs) )
+
+# Compilation of source files, depends on ALL headers
+$(build_dir)/%.o : %.$(SRCEXT) $(HEADERS)
+	$(COMPILER) $(strip $(sort $(CFLAGS) ) $(INCLUDES) -c $< -o $@ )
+
+.PHONY: variables
+variables:
+	# LIB:           $(LIB)
+	# BIN:           $(BIN)
+	# OBJ:           $(OBJ)
+	#
+	# HEADERS:       $(HEADERS)
+	# TESTDIR:       $(TESTDIR)
+	# SOURCES:       $(SOURCES)
+	# TEST_SOURCES:  $(TEST_SOURCES)
+	# TEST_NAMES:    $(TEST_NAMES)
+	# TEST_OBJ:      $(TEST_OBJ)
+
+
+# Clean the project
+.PHONY: c clean
+c: clean
+clean: clean_bin clean_obj
+
+# Clean the project of the executable
+.PHONY: cb clean_bin
+cb: clean_bin
+clean_bin:
+	$(RM) $(BIN) $(TEST_BIN)
+
+# Clean the project of object files
+.PHONY: co clean_obj
+co: clean_obj
+clean_obj:
+	$(RM) build/*
+#   find . -iname "*.o" -exec $(RM) {} \;
+#   find . -iname "*.a" -exec $(RM) {} \;
+#   find . -iname "*.so" -exec $(RM) {} \;
+#   find . -iname "*.gcda" -exec $(RM) {} \;
+#   find . -iname "*.gcno" -exec $(RM) {} \;
+#   find . -iname "*.il" -exec $(RM) {} \;
+
+# Clean the project of documentation files
+.PHONY: clean_doc
+clean_doc:
+	rm -fr doc/*
+
+.PHONY: cd clean_dat
+cd: clean_dat
+clean_dat:
+	rm -fr *.dat output/*
+
+# Clean the project of everything
+.PHONY: d distclean
+d: distclean
+distclean: clean_bin clean_obj clean_data clean_doc
+
+# Run the program
+.PHONY: r run
+r: run
+run: $(BIN)
+	$(SOFTLIMIT) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT) 2>&1 | tee output/make_run.log
+
+# Run the parallel program
+.PHONY: p rp pr
+rp: p
+pr: p
+p:
+	mpirun -np $(NP) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
+pk:
+	mpirun -np $(NP) $(CONSOLE) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
+pkd:
+	mpirun -np $(NP) $(CONSOLE) $(DEBUGGER) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
+pkv:
+	mpirun -np $(NP) $(CONSOLE) $(VALGRIND) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
+
+# Count the number of lines of project
+.PHONY: count
+count:
+	wc -l $(addsuffix /*, $(SRCDIRS))
+
+# Build doxygen documentation
+.PHONY: doxygen doc
+doc: doxygen
+doxygen:
+	doxygen
+
+# Run cppcheck on source code
+.PHONY: cppcheck check
+check: cppcheck
+cppcheck: force
+	cppcheck --enable=all $(SRCDIRS)
+
+# Run through valgrind for errors
+.PHONY: valgrind v vv
+v: valgrind
+valgrind: $(BIN)
+	$(MEMCHECK) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
+vv: $(BIN)
+	$(MEMCHECK) --verbose ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
+.PHONY: cachegrind cg
+cg: cachegrind
+cachegrind: $(BIN)
+	$(CACHEGRIND) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
+
+# Run through gdb for debugging
+.PHONY: g gdb
+g: gdb
+gdb: $(BIN)
+	$(DEBUGGER) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
+
+#################################################################
+# Target depending on the binary. Necessary for the previous
+# lines "ifneq ($(filter ..." to work.
+.PHONY: mpi omp optimized dg ocl
+# Don't build a binary if what we are building is a library
+ifneq ($(LIB),)
+mpi: force
+omp: force
+optimized: force
+ocl: force
+else
+mpi: $(BIN)
+omp: $(BIN)
+optimized: $(BIN)
+ocl: $(BIN)
+endif
+ds: force
+
+# Force target
+.PHONY: force
+force: ;
+
+############ End of file ########################################
