@@ -110,7 +110,7 @@ inline std::string Pause(std::string msg = std::string(""))
 }
 
 // **************************************************************
-IO::IO()
+void IO::Clear()
 {
     enable                  = false;
     period                  = 0.0;
@@ -123,12 +123,17 @@ IO::IO()
     append                  = false;
     force_at_next_iteration = false;
     disable_at_next_iteration = false;
+
+// **************************************************************
+IO::IO()
+{
+    Clear();
 }
 
 // **************************************************************
 IO::IO(const bool _enable)
 {
-    IO();
+    Clear();
     enable                  = _enable;
 }
 
@@ -141,7 +146,7 @@ IO::~IO()
 // **************************************************************
 void IO::Init(const double _period, const std::string _filename, const bool _binary)
 {
-    IO();
+    Clear();
     Set_Period(_period);
     filename = _filename;
     binary   = _binary;

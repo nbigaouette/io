@@ -55,6 +55,7 @@ class IO
 
     public:
 
+        void Clear();
         IO();
         IO(const bool _enable);
         ~IO();
