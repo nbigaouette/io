@@ -418,32 +418,44 @@ void IO::Write(const char *p, size_t size)
 // **************************************************************
 void IO::WriteString(const std::string &format, ...)
 {
+    assert(Is_Open());
+
     va_list args;
     va_start(args, format);
-    if (string_to_save == NULL)
+    
+    if (Is_Compressed() or !using_C_fh)
     {
-        //std_cout << "Allocating space for string_to_save...\n";
-        string_to_save = new char[1024];
-    }
+        if (string_to_save == NULL)
+        {
+            //std_cout << "Allocating space for string_to_save...\n";
+            string_to_save = new char[1024];
+        }
 
-    int result = vsprintf(string_to_save, format.c_str(), args);
-    if (result < 0)
-    {
-        printf("Couldn't call vsprintf! Aborting.\n");
-        abort();
-    }
-    va_end(args);
+        int result = vsprintf(string_to_save, format.c_str(), args);
+        if (result < 0)
+        {
+            printf("Couldn't call vsprintf! Aborting.\n");
+            abort();
+        }
+        va_end(args);
 
+        if (Is_Compressed())
+        {
 #ifdef COMPRESS_OUTPUT
-    if (Is_Compressed())
-    {
         const int error_code = gzwrite(compressed_fh, string_to_save, strlen(string_to_save));
         assert(error_code != 0);
+#else
+        abort();
+#endif // #ifdef COMPRESS_OUTPUT
+        }
+        else
+        {
+            fh << string_to_save;
+        }
     }
     else
-#endif // #ifdef COMPRESS_OUTPUT
     {
-        abort();
+        vfprintf(C_fh, format.c_str(), args);
     }
 }
 
