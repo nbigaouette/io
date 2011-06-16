@@ -206,6 +206,7 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
     {
 #ifdef COMPRESS_OUTPUT
         compressed = compressed_file;
+        filename += ".gz";
 #else // #ifdef COMPRESS_OUTPUT
         // If library not compiled with compression, disable flag.
         compressed = false;
