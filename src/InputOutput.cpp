@@ -14,6 +14,9 @@
 #define DEBUGP(x)  std_cout << __FILE__ << ":" << __LINE__ << ":\n    " << x;
 
 
+#define DEFAULT_BUFFER_SIZE 8192
+
+
 // **************************************************************
 void Print_Double_in_Binary(double d)
 /**
@@ -181,7 +184,8 @@ void IO::Disable()
 
 // **************************************************************
 bool IO::Open_File(const std::string full_mode, const bool quiet,
-                   const bool _using_C_fh, const bool check_if_file_exists)
+                   const bool _using_C_fh, const bool check_if_file_exists,
+                   const bool compressed_file)
 {
     assert(enable);
 
@@ -197,6 +201,15 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
     {
         mode = 'r';
         file_openmode = std::fstream::in;
+    }
+    else if (full_mode.find("z") != std::string::npos)
+    {
+#ifdef COMPRESS_OUTPUT
+        compressed = compressed_file;
+#else // #ifdef COMPRESS_OUTPUT
+        // If library not compiled with compression, disable flag.
+        compressed = false;
+#endif // #ifdef COMPRESS_OUTPUT
     }
     else if (full_mode.find("a") != std::string::npos)
     {
@@ -221,7 +234,14 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
         if (!quiet)
             std_cout << "Opening file \"" << filename << "\" for '" << full_mode << "'...\n";
 
-        if (using_C_fh)
+        if (Is_Compressed())
+        {
+#ifdef COMPRESS_OUTPUT
+            compressed_fh = gzopen(filename.c_str(), "wb");
+            gzbuffer(compressed_fh, DEFAULT_BUFFER_SIZE);
+#endif // #ifdef COMPRESS_OUTPUT
+        }
+        else if (using_C_fh)
         {
             C_fh = fopen(filename.c_str(), full_mode.c_str());
 

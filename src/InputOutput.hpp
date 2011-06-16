@@ -13,8 +13,12 @@ using namespace boost;
 // #include <cstdint> // requires C++0x
 #endif // #ifdef __PGI
 
-
 #include "tinyxml.hpp"
+
+#ifdef COMPRESS_OUTPUT
+#include <zlib.h>
+#endif // #ifdef COMPRESS_OUTPUT
+
 
 void Print_Double_in_Binary(double d);
 void Print_Double_in_Binary(float d);
@@ -26,6 +30,7 @@ class IO
 {
     private:
         bool enable;            // Is output enabled?
+        bool compressed;        // Is output compressed?
 
         double period;          // Period of saving
         double last_saved_time; // Last time which forced a save
@@ -34,6 +39,9 @@ class IO
         std::fstream fh;        // C++ File handle
         FILE *C_fh;             // Alternate C file handle
         bool using_C_fh;
+#ifdef COMPRESS_OUTPUT
+        gzFile compressed_fh;
+#endif // #ifdef COMPRESS_OUTPUT
 
         std::string filename;   // File name
         char mode;              // Read or write?
@@ -58,13 +66,15 @@ class IO
         void Enable();
         bool Open_File(const std::string mode, const bool quiet = false,
                        const bool _using_C_fh = false,
-                       const bool check_if_file_exists = true);
+                       const bool check_if_file_exists = true,
+                       const bool compressed_file = false);
         void Close_File();
         uint64_t Get_Nb_Saved() { return nb_saved; }
 
         void Write(const char *p, size_t size);
 
         inline bool             Is_Enable()                 { return enable;    }
+        inline bool             Is_Compressed()             { return compressed;    }
         inline bool             Is_Open()                   { return (using_C_fh ? ((C_fh != NULL) ? true : false ) : (fh.is_open() ? true : false)); }
         inline std::fstream&    Fh()                        { return fh;        }
         inline FILE *           C_Fh()                      { return C_fh;      }
