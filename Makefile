@@ -27,6 +27,11 @@ LIB_OBJ          = $(OBJ)
 # Project is a library. Include the makefile for build and install.
 include makefiles/Makefile.library
 
+# Compression. Uncomment to enable compression. Requires libz
+CFLAGS          += -DCOMPRESS_OUTPUT
+LDFLAGS         += -lz
+#LDFLAGS         += libz.a
+
 # TinyXML might report failures under valgrind when compiled with
 # Intel's compiler (optimized or not). To fix this, tell TinyXML
 # to use STL's strings internally.
