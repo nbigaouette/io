@@ -126,7 +126,9 @@ void IO::Clear()
     append                  = false;
     force_at_next_iteration = false;
     disable_at_next_iteration = false;
+    compressed              = false;
     compressed_fh           = NULL;
+}
 
 // **************************************************************
 IO::IO()
@@ -193,10 +195,10 @@ void IO::Disable()
 
 // **************************************************************
 bool IO::Open_File(const std::string full_mode, const bool quiet,
-                   const bool _using_C_fh, const bool check_if_file_exists,
-                   const bool compressed_file)
+                   const bool _using_C_fh, const bool check_if_file_exists)
 {
     assert(enable);
+    compressed = false;
 
     using_C_fh = _using_C_fh;
 
