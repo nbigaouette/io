@@ -60,8 +60,7 @@ class IO
         void Enable();
         bool Open_File(const std::string mode, const bool quiet = false,
                        const bool _using_C_fh = false,
-                       const bool check_if_file_exists = true,
-                       const bool compressed_file = false);
+                       const bool check_if_file_exists = true);
         void Close_File();
         uint64_t Get_Nb_Saved() { return nb_saved; }
 
