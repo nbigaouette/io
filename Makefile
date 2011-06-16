@@ -24,13 +24,15 @@ include makefiles/Makefile.rules
 
 LIB_OBJ          = $(OBJ)
 
-# Project is a library. Include the makefile for build and install.
-include makefiles/Makefile.library
-
 # Compression. Uncomment to enable compression. Requires libz
 CFLAGS          += -DCOMPRESS_OUTPUT
-LDFLAGS         += -lz
-#LDFLAGS         += libz.a
+libz_OBJ = $(addprefix $(build_dir)/, adler32.o compress.o crc32.o deflate.o gzclose.o gzlib.o gzread.o gzwrite.o infback.o inffast.o inflate.o inftrees.o trees.o uncompr.o zutil.o)
+LIB_OBJ := $(libz_OBJ) $(LIB_OBJ)
+
+
+
+# Project is a library. Include the makefile for build and install.
+include makefiles/Makefile.library
 
 # TinyXML might report failures under valgrind when compiled with
 # Intel's compiler (optimized or not). To fix this, tell TinyXML
@@ -42,5 +44,8 @@ $(eval $(call Flags_template,stdcout,StdCout.hpp,ssh://optimusprime.selfip.net/g
 $(eval $(call CFlags_template,assert,Assert.hpp,ssh://optimusprime.selfip.net/git/nicolas/assert.git))
 
 
+# Extract all objects files from static library in build
+$(libz_OBJ): /usr/lib/libz.a
+	cd $(build_dir) && ar x /usr/lib/libz.a && cd ..
 
 ############ End of file ########################################
