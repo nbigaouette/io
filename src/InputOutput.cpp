@@ -128,6 +128,7 @@ void IO::Clear()
     disable_at_next_iteration = false;
     compressed              = false;
     compressed_fh           = NULL;
+    string_to_save          = NULL;
 }
 
 // **************************************************************
@@ -385,6 +386,10 @@ void IO::Close_File()
         if (fh.is_open())
             fh.close();
     }
+
+    if (string_to_save != NULL)
+        delete[] string_to_save;
+    string_to_save = NULL;
 }
 
 // **************************************************************
@@ -407,6 +412,38 @@ void IO::Write(const char *p, size_t size)
         assert(Is_Enable());
 
         fh.write(p, size);
+    }
+}
+
+// **************************************************************
+void IO::WriteString(const std::string &format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    if (string_to_save == NULL)
+    {
+        //std_cout << "Allocating space for string_to_save...\n";
+        string_to_save = new char[1024];
+    }
+
+    int result = vsprintf(string_to_save, format.c_str(), args);
+    if (result < 0)
+    {
+        printf("Couldn't call vsprintf! Aborting.\n");
+        abort();
+    }
+    va_end(args);
+
+#ifdef COMPRESS_OUTPUT
+    if (Is_Compressed())
+    {
+        const int error_code = gzwrite(compressed_fh, string_to_save, strlen(string_to_save));
+        assert(error_code != 0);
+    }
+    else
+#endif // #ifdef COMPRESS_OUTPUT
+    {
+        abort();
     }
 }
 

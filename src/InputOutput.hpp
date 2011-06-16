@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cstdarg>
 
 #ifdef __PGI
 #include <boost/cstdint.hpp>
@@ -35,6 +36,7 @@ class IO
         FILE *C_fh;             // Alternate C file handle
         bool using_C_fh;
         void *compressed_fh;
+        char *string_to_save;
 
         std::string filename;   // File name
         char mode;              // Read or write?
@@ -65,6 +67,7 @@ class IO
         uint64_t Get_Nb_Saved() { return nb_saved; }
 
         void Write(const char *p, size_t size);
+        void WriteString(const std::string &format, ...);
 
         inline bool             Is_Enable()                 { return enable;    }
         inline bool             Is_Compressed()             { return compressed;    }
