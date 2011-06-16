@@ -210,6 +210,7 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
 #else // #ifdef COMPRESS_OUTPUT
         // If library not compiled with compression, disable flag.
         compressed = false;
+        std_cout << "Compression for file '" << filename << "' disabled. Please compile io.git with -DCOMPRESS_OUTPUT if you want compression.\n";
 #endif // #ifdef COMPRESS_OUTPUT
     }
     else if (full_mode.find("a") != std::string::npos)
