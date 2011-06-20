@@ -408,6 +408,8 @@ void IO::Write(const char *p, size_t size)
 #ifdef COMPRESS_OUTPUT
         const int error_code = gzwrite(compressed_fh, p, size);
         assert(error_code != 0);
+#else
+        abort();
 #endif // #ifdef COMPRESS_OUTPUT
     }
     else if (using_C_fh)
