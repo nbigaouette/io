@@ -224,7 +224,7 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
         std_cout << "ERROR: Unknown mode '" << full_mode << "'. Exiting.\n";
         abort();
     }
-    
+
     if (full_mode.find("z") != std::string::npos)
     {
 #ifdef COMPRESS_OUTPUT
@@ -400,7 +400,7 @@ void IO::Write(const char *p, size_t size)
 
     if (Is_Compressed())
     {
-#ifdef COMPRESS_OUTPUT    
+#ifdef COMPRESS_OUTPUT
         const int error_code = gzwrite(compressed_fh, p, size);
         assert(error_code != 0);
 #endif // #ifdef COMPRESS_OUTPUT
@@ -422,7 +422,7 @@ void IO::WriteString(const std::string &format, ...)
 
     va_list args;
     va_start(args, format);
-    
+
     if (Is_Compressed() or !using_C_fh)
     {
         if (string_to_save == NULL)
