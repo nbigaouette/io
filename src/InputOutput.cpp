@@ -373,9 +373,13 @@ void IO::Close_File()
 {
     if (Is_Compressed())
     {
+#ifdef COMPRESS_OUTPUT
         if (compressed_fh != NULL)
             gzclose((gzFile *) compressed_fh);
         compressed_fh = NULL;
+#else // #ifdef COMPRESS_OUTPUT
+        abort();
+#endif // #ifdef COMPRESS_OUTPUT
     }
     else if (using_C_fh)
     {
