@@ -462,7 +462,15 @@ void IO::WriteString(const std::string &format, ...)
 // **************************************************************
 void IO::Flush()
 {
-    if (using_C_fh)
+    if (Is_Compressed())
+    {
+#ifdef COMPRESS_OUTPUT
+        gzflush(compressed_fh, Z_FINISH);
+#else // #ifdef COMPRESS_OUTPUT
+        abort();
+#endif // #ifdef COMPRESS_OUTPUT
+    }
+    else if (using_C_fh)
     {
         fflush(C_fh);
     } else {
