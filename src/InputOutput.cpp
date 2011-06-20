@@ -412,7 +412,7 @@ void IO::Write(const char *p, size_t size)
     }
     else if (using_C_fh)
     {
-        abort();
+        fwrite(p, size, 1, C_fh);
     }
     else
     {
