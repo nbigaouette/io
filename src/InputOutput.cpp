@@ -14,6 +14,12 @@
 #define DEBUGP(x)  std_cout << __FILE__ << ":" << __LINE__ << ":\n    " << x;
 
 
+#ifdef COMPRESS_OUTPUT
+#include <zlib.h>
+#define DEFAULT_BUFFER_SIZE 8192
+#endif // #ifdef COMPRESS_OUTPUT
+
+
 // **************************************************************
 void Print_Double_in_Binary(double d)
 /**
@@ -107,7 +113,7 @@ inline std::string Pause(std::string msg = std::string(""))
 }
 
 // **************************************************************
-IO::IO()
+void IO::Clear()
 {
     enable                  = false;
     period                  = 0.0;
@@ -120,12 +126,21 @@ IO::IO()
     append                  = false;
     force_at_next_iteration = false;
     disable_at_next_iteration = false;
+    compressed              = false;
+    compressed_fh           = NULL;
+    string_to_save          = NULL;
+}
+
+// **************************************************************
+IO::IO()
+{
+    Clear();
 }
 
 // **************************************************************
 IO::IO(const bool _enable)
 {
-    IO();
+    Clear();
     enable                  = _enable;
 }
 
@@ -138,7 +153,7 @@ IO::~IO()
 // **************************************************************
 void IO::Init(const double _period, const std::string _filename, const bool _binary)
 {
-    IO();
+    Clear();
     Set_Period(_period);
     filename = _filename;
     binary   = _binary;
@@ -184,6 +199,7 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
                    const bool _using_C_fh, const bool check_if_file_exists)
 {
     assert(enable);
+    compressed = false;
 
     using_C_fh = _using_C_fh;
 
@@ -209,6 +225,18 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
         abort();
     }
 
+    if (full_mode.find("z") != std::string::npos)
+    {
+#ifdef COMPRESS_OUTPUT
+        compressed = true;
+        filename += ".gz";
+#else // #ifdef COMPRESS_OUTPUT
+        // If library not compiled with compression, disable flag.
+        compressed = false;
+        std_cout << "Compression for file '" << filename << "' disabled. Please compile io.git with -DCOMPRESS_OUTPUT if you want compression.\n";
+#endif // #ifdef COMPRESS_OUTPUT
+    }
+
     if (full_mode.find("b") != std::string::npos)
     {
         binary = true;
@@ -221,7 +249,16 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
         if (!quiet)
             std_cout << "Opening file \"" << filename << "\" for '" << full_mode << "'...\n";
 
-        if (using_C_fh)
+        if (Is_Compressed())
+        {
+#ifdef COMPRESS_OUTPUT
+            gzFile tmp_file = gzopen(filename.c_str(), "wb");
+            gzbuffer(tmp_file, DEFAULT_BUFFER_SIZE);
+            compressed_fh = (void *) tmp_file;
+            retry = false;
+#endif // #ifdef COMPRESS_OUTPUT
+        }
+        else if (using_C_fh)
         {
             C_fh = fopen(filename.c_str(), full_mode.c_str());
 
@@ -334,7 +371,17 @@ bool IO::Is_Output_Permitted(const double time, const bool dont_set_previous_per
 // **************************************************************
 void IO::Close_File()
 {
-    if (using_C_fh)
+    if (Is_Compressed())
+    {
+#ifdef COMPRESS_OUTPUT
+        if (compressed_fh != NULL)
+            gzclose((gzFile *) compressed_fh);
+        compressed_fh = NULL;
+#else // #ifdef COMPRESS_OUTPUT
+        abort();
+#endif // #ifdef COMPRESS_OUTPUT
+    }
+    else if (using_C_fh)
     {
         if (C_fh != NULL)
             fclose(C_fh);
@@ -343,28 +390,91 @@ void IO::Close_File()
         if (fh.is_open())
             fh.close();
     }
+
+    if (string_to_save != NULL)
+        delete[] string_to_save;
+    string_to_save = NULL;
 }
 
 // **************************************************************
 void IO::Write(const char *p, size_t size)
 {
-    if (using_C_fh)
+    assert(Is_Open());
+    assert(Is_Enable());
+
+    if (Is_Compressed())
+    {
+#ifdef COMPRESS_OUTPUT
+        const int error_code = gzwrite(compressed_fh, p, size);
+        assert(error_code != 0);
+#endif // #ifdef COMPRESS_OUTPUT
+    }
+    else if (using_C_fh)
     {
         abort();
     }
     else
     {
-        assert(Is_Open());
-        assert(Is_Enable());
-
         fh.write(p, size);
+    }
+}
+
+// **************************************************************
+void IO::WriteString(const std::string &format, ...)
+{
+    assert(Is_Open());
+
+    va_list args;
+    va_start(args, format);
+
+    if (Is_Compressed() or !using_C_fh)
+    {
+        if (string_to_save == NULL)
+        {
+            //std_cout << "Allocating space for string_to_save...\n";
+            string_to_save = new char[1024];
+        }
+
+        int result = vsprintf(string_to_save, format.c_str(), args);
+        if (result < 0)
+        {
+            printf("Couldn't call vsprintf! Aborting.\n");
+            abort();
+        }
+        va_end(args);
+
+        if (Is_Compressed())
+        {
+#ifdef COMPRESS_OUTPUT
+        const int error_code = gzwrite(compressed_fh, string_to_save, strlen(string_to_save));
+        assert(error_code != 0);
+#else
+        abort();
+#endif // #ifdef COMPRESS_OUTPUT
+        }
+        else
+        {
+            fh << string_to_save;
+        }
+    }
+    else
+    {
+        vfprintf(C_fh, format.c_str(), args);
     }
 }
 
 // **************************************************************
 void IO::Flush()
 {
-    if (using_C_fh)
+    if (Is_Compressed())
+    {
+#ifdef COMPRESS_OUTPUT
+        gzflush(compressed_fh, Z_FINISH);
+#else // #ifdef COMPRESS_OUTPUT
+        abort();
+#endif // #ifdef COMPRESS_OUTPUT
+    }
+    else if (using_C_fh)
     {
         fflush(C_fh);
     } else {

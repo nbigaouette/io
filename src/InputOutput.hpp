@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cstdarg>
 
 #ifdef __PGI
 #include <boost/cstdint.hpp>
@@ -12,7 +13,6 @@ using namespace boost;
 #include <stdint.h> // (u)int64_t
 // #include <cstdint> // requires C++0x
 #endif // #ifdef __PGI
-
 
 #include "tinyxml.hpp"
 
@@ -26,6 +26,7 @@ class IO
 {
     private:
         bool enable;            // Is output enabled?
+        bool compressed;        // Is output compressed?
 
         double period;          // Period of saving
         double last_saved_time; // Last time which forced a save
@@ -34,6 +35,8 @@ class IO
         std::fstream fh;        // C++ File handle
         FILE *C_fh;             // Alternate C file handle
         bool using_C_fh;
+        void *compressed_fh;
+        char *string_to_save;
 
         std::string filename;   // File name
         char mode;              // Read or write?
@@ -47,6 +50,7 @@ class IO
 
     public:
 
+        void Clear();
         IO();
         IO(const bool _enable);
         ~IO();
@@ -63,9 +67,11 @@ class IO
         uint64_t Get_Nb_Saved() { return nb_saved; }
 
         void Write(const char *p, size_t size);
+        void WriteString(const std::string &format, ...);
 
         inline bool             Is_Enable()                 { return enable;    }
-        inline bool             Is_Open()                   { return (using_C_fh ? ((C_fh != NULL) ? true : false ) : (fh.is_open() ? true : false)); }
+        inline bool             Is_Compressed()             { return compressed;    }
+        inline bool             Is_Open()                   { return (compressed_fh != NULL ? true : (using_C_fh ? ((C_fh != NULL) ? true : false ) : (fh.is_open() ? true : false))); }
         inline std::fstream&    Fh()                        { return fh;        }
         inline FILE *           C_Fh()                      { return C_fh;      }
         inline std::string      Get_Filename()              { return filename;  }

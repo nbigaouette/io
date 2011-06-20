@@ -1,0 +1,174 @@
+TEST_SOURCES     = $(subst $(TESTDIRS)/,,$(foreach DIR,$(TESTDIRS) .,$(wildcard $(DIR)/*.$(SRCEXT) ) ) )
+TEST_NAMES       = $(subst .$(SRCEXT),,$(TEST_SOURCES) )
+TEST_BASENAMES   = $(notdir $(TEST_NAMES) )
+
+
+#TEST_OBJ         = $(filter $(build_dir)/Test%.o, $(OBJ) )
+TEST_OBJ         = $(addprefix $(build_dir)/,$(addsuffix .o, $(TEST_BASENAMES) ) )
+LIB_OBJ          = $(filter-out $(build_dir)/$(TESTMAIN_BASENAME).o, $(filter-out $(TEST_OBJ), $(OBJ) ) )
+#LIB_OBJ          = $(OBJ)
+
+TESTMAIN_BASENAME = $(subst $(TESTDIRS)/,,$(TESTMAIN))
+
+### Just build "full" and install
+.PHONY: f
+f:
+	$(MAKE) shared static install $(filter-out f, $(MAKECMDGOALS) )
+
+### Compilation of main() ###
+$(build_dir)/$(TESTMAIN_BASENAME).o:
+	$(COMPILER) -c $(strip $(CFLAGS) $(INCLUDES)) -o $(build_dir)/$(TESTMAIN_BASENAME).o $(TESTMAIN).$(SRCEXT)
+
+.PHONY: shared lib_shared
+shared: lib_shared
+lib_shared: $(build_dir)/lib$(LIB).so
+$(build_dir)/lib$(LIB).so: $(LIB_OBJ)
+	############################################################
+	######## Building shared library... ########################
+	#
+	$(LD) $(LIB_OPTIONS) -o $(build_dir)/lib$(LIB).so $(LIB_OBJ)
+	######## Done ##############################################
+
+.PHONY: static lib_static
+static: lib_static
+lib_static: $(build_dir)/lib$(LIB).a
+$(build_dir)/lib$(LIB).a: $(LIB_OBJ)
+	############################################################
+	######## Building static library... ########################
+	#
+	ar rc $(build_dir)/lib$(LIB).a $(LIB_OBJ)
+	######## Done ##############################################
+#   ranlib $(build_dir)/lib$(LIB).a
+
+.PHONY: test_static
+test_static: static $(OBJ) $(TEST_OBJ)
+	############################################################
+	######## Test static library ###############################
+	$(LD) $(TEST_OBJ) $(build_dir)/lib$(LIB).a -o $(BIN) $(filter-out -l$(LIB),$(LDFLAGS))
+	./$(BIN)
+	######## Done ##############################################
+
+.PHONY: test_shared
+test_shared: shared $(OBJ) $(TEST_OBJ)
+	############################################################
+	######## Test shared library ###############################
+	$(LD) $(TEST_OBJ) -L$(build_dir) -l$(LIB) $(filter-out $(build_dir)/lib$(LIB).a,$(LDFLAGS)) -o $(BIN)
+	LD_LIBRARY_PATH=$(build_dir) ./$(BIN)
+	######## Done ##############################################
+
+### Install #####################################################
+INSTALL          = install -m644 -D
+INSTALL_EXEC     = install -m755 -D
+SUDO             = sudo
+ifeq ($(DESTDIR),)
+    DESTDIR      = /usr
+    ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
+        DESTDIR := /home/$(user)/usr
+        INSTALL := /usr/ucb/$(subst -D,,$(INSTALL) )
+        INSTALL_EXEC := /usr/ucb/$(subst -D,,$(INSTALL_EXEC) )
+    endif
+    ifneq (,$(filter $(host), $(SHARCNET_MACHINES) ))
+        DESTDIR := /home/$(user)/usr
+    endif
+endif
+DESTDIR         := $(abspath $(DESTDIR) )
+
+# If installing into home directory, we do not need sudo
+ifeq ($(findstring /home/$(user),$(abspath $(DESTDIR))),/home/$(user))
+SUDO            :=
+endif
+
+test:
+	# abspath ..: $(abspath ../usr)
+	# abspath home: $(abspath /home/nicolas/usr)
+	# Find: $(findstring /home/$(user),$(abspath $(DESTDIR)))
+#	# TEST_BASENAMES = $(TEST_BASENAMES)
+#	# TEST_OBJ = $(TEST_OBJ)
+#	# LIB_OBJ = $(LIB_OBJ)
+#	# DESTDIR = $(DESTDIR)
+
+### If installing to "/home/...", we don't need sudo
+ifneq ($(findstring /home/$(user),$(DESTDIR) ),)
+    SUDO        :=
+endif
+
+### Remove "/gcc/" from installation path if built with gcc
+DESTDIR_LIB      = $(DESTDIR)/lib
+DESTDIR_INC      = $(DESTDIR)/include
+### Don't create directory just for 1 header
+ifneq ($(words $(HEADERS)),1)
+DESTDIR_INC     :=  $(addsuffix /$(LIB), $(DESTDIR_INC) )
+endif
+ifneq ($(DESTDIRCOMPILER),gcc)
+    DESTDIR_LIB := $(DESTDIR_LIB)/$(DESTDIRCOMPILER)
+endif
+
+HEADERS_NOTESTING=$(filter-out $(wildcard testing/*.$(HEADEXT)), $(HEADERS) )
+HEADERS_NOTESTING_NOSRC=$(subst src/,,$(HEADERS_NOTESTING) )
+INSTALLED_HEADERS=$(addprefix $(DESTDIR_INC)/, $(HEADERS_NOTESTING_NOSRC) )
+
+.PHONY: test2
+test2:
+	#### $(HEADERS)
+	#### $(HEADERS_NOTESTING)
+	#### $(HEADERS_NOTESTING_NOSRC)
+	#### $(INSTALLED_HEADERS)
+
+### Install only the build (static,shared) stated as target
+TO_INSTALL       = install_headers
+ifeq ($(filter shared, $(MAKECMDGOALS)), shared)
+TO_INSTALL      += install_shared
+endif
+ifeq ($(filter static, $(MAKECMDGOALS)), static)
+TO_INSTALL      += install_static
+endif
+.PHONY: install
+install: $(TO_INSTALL)
+
+.PHONY: install_static
+install_static: $(DESTDIR_LIB)/lib$(LIB).a instal_create_folders
+$(DESTDIR_LIB)/lib$(LIB).a: $(build_dir)/lib$(LIB).a
+	############################################################
+	######## Installing static library to $(DESTDIR_LIB)... ####
+	$(SUDO) $(INSTALL) $< $@
+	############################################################
+	######## Done ##############################################
+
+.PHONY: install_shared
+install_shared: $(DESTDIR_LIB)/lib$(LIB).so instal_create_folders
+$(DESTDIR_LIB)/lib$(LIB).so: $(build_dir)/lib$(LIB).so
+	############################################################
+	######## Installing shared library to $(DESTDIR_LIB)... ####
+	$(SUDO) $(INSTALL_EXEC) $< $@
+	############################################################
+	######## Done ##############################################
+
+.PHONY: install_headers install_headers_print install_headers_print_done
+ifeq ($(wildcard $(DESTDIR_INC)/*),)
+install_headers_print: instal_create_folders
+	############################################################
+	######## Installing library headers to $(DESTDIR_INC)... ###
+install_headers_print_done:
+	############################################################
+	######## Done ##############################################
+else
+install_headers_print:
+install_headers_print_done:
+endif
+install_headers: install_headers_print $(INSTALLED_HEADERS) install_headers_print_done
+$(DESTDIR_INC)/%.$(HEADEXT): src/%.$(HEADEXT)
+	$(SUDO) $(INSTALL) $< $@
+
+instal_create_folders:
+ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
+	$(SUDO) mkdir -p $(DESTDIR_INC)/include/tinyxml
+	$(SUDO) mkdir -p $(DESTDIR_LIB)
+endif
+
+.PHONY: uninstall
+uninstall: force
+	############################################################
+	######## Removing library from $(DESTDIR_LIB)... ###
+	$(SUDO) $(RM) $(DESTDIR_LIB)/lib$(LIB)*
+	######## Removing library headers from $(DESTDIR_INC)... ###
+	$(SUDO) $(RM) -r $(DESTDIR_INC)

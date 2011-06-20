@@ -24,6 +24,24 @@ include makefiles/Makefile.rules
 
 LIB_OBJ          = $(OBJ)
 
+# Compression. Uncomment to enable compression. Requires libz
+CFLAGS          += -DCOMPRESS_OUTPUT
+
+### Following is needed for compression. Don't touch!
+ifneq (,$(findstring -DCOMPRESS_OUTPUT,$(CFLAGS)))
+libz_loc = ../libz.git/src
+LIBZ_OBJ = adler32.o compress.o crc32.o deflate.o gzclose.o gzlib.o gzread.o gzwrite.o infback.o inffast.o inflate.o inftrees.o trees.o uncompr.o zutil.o
+LIBZ_OBJ_build = $(addprefix $(build_dir)/libz/, $(notdir $(LIBZ_OBJ)) )
+
+LIB_OBJ += $(LIBZ_OBJ_build)
+
+$(build_dir)/libz :
+	mkdir -p $(build_dir)/libz
+$(build_dir)/libz/%.o : ../libz.git/src/%.o $(build_dir)/libz
+	cp $< $@
+endif
+### End of compression block
+
 # Project is a library. Include the makefile for build and install.
 include makefiles/Makefile.library
 
@@ -35,7 +53,6 @@ CFLAGS          += -DTIXML_USE_STL
 
 $(eval $(call Flags_template,stdcout,StdCout.hpp,ssh://optimusprime.selfip.net/git/nicolas/stdcout.git))
 $(eval $(call CFlags_template,assert,Assert.hpp,ssh://optimusprime.selfip.net/git/nicolas/assert.git))
-
 
 
 ############ End of file ########################################

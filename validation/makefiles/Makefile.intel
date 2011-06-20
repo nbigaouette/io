@@ -1,0 +1,69 @@
+#################################################################
+# Makefile for compilation with Intel's compiler
+# Default: debug  & serial
+DESTDIRCOMPILER := intel
+CC              := icc
+CPP             := icpc
+CFLAGS          := -O0 -g -DYDEBUG -Wall -w2 -wn1
+CFLAGS          += -wd981   # remark #981: operands are evaluated in unspecified order
+CFLAGS          += -wd1419  # remark #1419: external declaration in primary source file
+CFLAGS          += -wd869   # remark #869: parameter "???" was never referenced
+CFLAGS          += -wd1418  # remark #1418: external function definition with no prior declaration
+CFLAGS          += -wd383   # remark #383: value copied to temporary, reference to temporary used
+CFLAGS          += -wd161   # warning #161: unrecognized #pragma
+
+RPATH           := -Wl,-rpath,
+
+LibMath         := -lm
+LDFLAGS         :=
+OMP_CFLAGS      := -openmp
+OMP_LDFLAGS     := -openmp
+
+#################################################################
+# Call "make optimized" for optimized compilation
+ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
+    CFLAGS      := -O3 -w1 -ipo -DNDEBUG -Wall
+    LDFLAGS     := -O3 -w1 -ipo
+    CFLAGS      += -wd981   # remark #981: operands are evaluated in unspecified order
+    CFLAGS      += -wd1419  # remark #1419: external declaration in primary source file
+    CFLAGS      += -wd869   # remark #869: parameter "???" was never referenced
+    CFLAGS      += -wd1418  # remark #1418: external function definition with no prior
+    CFLAGS      += -wd383   # remark #383: value copied to temporary, reference to temporary used
+    CFLAGS      += -wd161   # warning #161: unrecognized #pragma
+endif
+#################################################################
+# MPI location
+MPILOC          := /usr/lib/intel/openmpi/bin/
+
+#################################################################
+# FLAGS that should appear, whatever the compilation options
+CFLAGS          += -m64
+LDFLAGS         += -m64
+
+# Create "position independant" code on x86_64
+ifeq ($(arch),x86_64)
+    CFLAGS      += -fPIC
+    LDFLAGS     += -fPIC
+endif
+
+ifeq ($(LINK_PREFERED), static)
+LDFLAGS         += -static-intel
+endif
+
+GCC_MAJOR       := $(shell gcc -dumpversion | cut -d'.' -f1)
+GCC_MINOR       := $(shell gcc -dumpversion | cut -d'.' -f2)
+GCC_REV         := $(shell gcc -dumpversion | cut -d'.' -f3)
+ifeq ($(GCC_MAJOR).$(GCC_MINOR),4.5)
+GCC34_LOC       := /opt/gcc34
+CFLAGS += -gcc-name=$(GCC34_LOC)/bin/gcc
+CFLAGS += -gxx-name=$(GCC34_LOC)/bin/g++
+endif
+
+# Detect if compilation for library
+ifneq ($(LIB),)
+intel: force
+else
+intel: $(BIN)
+endif
+
+############ End of file ########################################
