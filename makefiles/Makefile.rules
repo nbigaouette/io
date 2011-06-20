@@ -246,7 +246,7 @@ clean_bin:
 .PHONY: co clean_obj
 co: clean_obj
 clean_obj:
-	$(RM) build/*
+	$(RM) -r build/*
 #   find . -iname "*.o" -exec $(RM) {} \;
 #   find . -iname "*.a" -exec $(RM) {} \;
 #   find . -iname "*.so" -exec $(RM) {} \;
