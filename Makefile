@@ -30,6 +30,7 @@ CFLAGS          += -DCOMPRESS_OUTPUT
 ### Following is needed for compression. Don't touch!
 ifneq (,$(findstring -DCOMPRESS_OUTPUT,$(CFLAGS)))
 libz_loc = ../libz.git/src
+CFLAGS          += -I$(libz_loc)/
 LIBZ_OBJ = adler32.o compress.o crc32.o deflate.o gzclose.o gzlib.o gzread.o gzwrite.o infback.o inffast.o inflate.o inftrees.o trees.o uncompr.o zutil.o
 LIBZ_OBJ_build = $(addprefix $(build_dir)/libz/, $(notdir $(LIBZ_OBJ)) )
 
