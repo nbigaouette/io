@@ -222,7 +222,7 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
     }
     else
     {
-        std_cout << "ERROR: Unknown mode '" << full_mode << "'. Exiting.\n";
+        std_cout << "ERROR: Unknown mode '" << full_mode << "'. Exiting.\n" << std::flush;
         abort();
     }
 
@@ -563,7 +563,7 @@ void ReadXML::Open(const std::string _name, const std::string _filename)
     // Load it in memory and check
     if (!Document.LoadFile())
     {
-        std_cout << "Error reading XML file '" << filename << "'\n";
+        std_cout << "Error reading XML file '" << filename << "'\n" << std::flush;
         abort();
     }
     else
@@ -938,7 +938,7 @@ std::string ReadXML::Get_Attribute_String(const std::string element, const std::
     const char *found_attribute = subnode->ToElement()->Attribute(attribute.c_str());
     if (found_attribute == NULL)
     {
-        std_cout << "ERROR: Attribute '" << attribute << "' in '" << element << "' not found!\n";
+        std_cout << "ERROR: Attribute '" << attribute << "' in '" << element << "' not found!\n" << std::flush;
         abort();
     }
 
@@ -1084,7 +1084,7 @@ double ReadXML::Factor_Unit_To_Metre(const std::string element)
             << "Error in reading XML input file:\n"
             << "Unit of " << element << " needs to be either:\n"
             << "    au\n    bohr\n    angstrom\n    nm\n    mum\n    mm\n    cm\n    m\n"
-            << "Aborting\n";
+            << "Aborting\n" << std::flush;
         abort();
     }
 
@@ -1112,7 +1112,7 @@ double ReadXML::Factor_Unit_To_Second(const std::string element)
             << "Error in reading XML input file:\n"
             << "Unit of " << element << " needs to be either:\n"
             << "    au\n    zs\n    as\n    fs\n    ps\n    ns\n    mus\n    ms\n    s\n"
-            << "Aborting\n";
+            << "Aborting\n" << std::flush;
         abort();
     }
 
@@ -1147,7 +1147,7 @@ double ReadXML::Factor_Unit_To_Intensity_AU(const std::string element)
             << "Error in reading XML input file:\n"
             << "Unit of " << element << " needs to be either:\n"
             << "    W/cm^2\n    W.cm-^2\n    W/m^2\n    W.m-^2\n"
-            << "Aborting\n";
+            << "Aborting\n" << std::flush;
         abort();
     }
 
