@@ -441,7 +441,7 @@ void IO::WriteString(const std::string &format, ...)
         int result = vsprintf(string_to_save, format.c_str(), args);
         if (result < 0)
         {
-            printf("Couldn't call vsprintf! Aborting.\n");
+            std_cout << "Couldn't call vsprintf! Aborting.\n" << std::flush;
             abort();
         }
         va_end(args);
