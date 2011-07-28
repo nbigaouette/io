@@ -218,7 +218,8 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
     else if (full_mode.find("a") != std::string::npos)
     {
         append = true;
-        file_openmode |= std::fstream::app;
+        mode = 'a';
+        file_openmode = std::fstream::out | std::fstream::app;
     }
     else
     {
@@ -485,7 +486,7 @@ void IO::Flush()
     {
         fflush(C_fh);
     } else {
-        if (fh.is_open() && mode == 'w')
+        if (fh.is_open() && (mode == 'w' || mode == 'a'))
             fh.flush();
     }
 }
