@@ -83,9 +83,10 @@ NetCDF_Variable::NetCDF_Variable()
 }
 
 // **************************************************************
-NetCDF_Variable::NetCDF_Variable(const int &_ncid, const std::string &_name,
-                                 const void *const _pointer,
-                                 const int _type_index, const bool compress)
+template <class T>
+void NetCDF_Variable::Init(const int &_ncid, const std::string &_name,
+                           const T *const _pointer,
+                           const int _type_index, const bool compress)
 {
     ncid            = _ncid;
     name            = _name;
@@ -266,8 +267,9 @@ void NetCDF_Out::Open(const std::string _filename, const bool netcdf4)
 }
 
 // **************************************************************
+template <class T>
 void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
-                              const void *const pointer,
+                              const T *const pointer,
                               const NetCDF_Dimensions dims,
                               const std::string units)
 {
@@ -277,7 +279,28 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
         std_cout << "NetCDF_Out::Add_Variable() Adding variable '" << name << "' of type '" << type_index << "' (" << netcdf_types_string[type_index] << ") to  file '" << filename << "'...\n";
 
     // Create empty variable
-    variables[name] = NetCDF_Variable(ncid, name, pointer, type_index, is_netcdf4);
+    variables[name] = NetCDF_Variable();
+    variables[name].Init(ncid, name, pointer, type_index, is_netcdf4);
+
+    // fdouble is not defined here. Codes can define it as "float" or "double". Since the
+    // function definition for Add_Variable() is compiled before knowing which one will
+    // be used, we need to treat this type differently.
+    if (type_index == netcdf_type_fdouble)
+    {
+        // Set the right type_index
+        if (sizeof(T) == sizeof(float))
+            variables[name].type_index = netcdf_type_float;
+        else if (sizeof(T) == sizeof(double))
+            variables[name].type_index = netcdf_type_double;
+        else
+        {
+            std_cout << "ERROR: Wrong template for NetCDF_Variable::NetCDF_Variable()?\n" << std::flush;
+            abort();
+        }
+        // One the type_index is set, update the netcdf_type
+        variables[name].netcdf_type = netcdf_types[variables[name].type_index];
+    }
+
 
     // Commit every dimensions, but only if it's not yet committed
     for (size_t i = 0 ; i < dims.size() ; i++)
@@ -333,26 +356,28 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
 }
 
 // **************************************************************
+template <class T>
 void NetCDF_Out::Add_Variable_Scalar(const std::string name, const int type_index,
-                                     const void *const pointer, const std::string units)
+                                     const T *const pointer, const std::string units)
 {
     assert(is_opened);
 
     NetCDF_Dimensions scalar;
     scalar.Add("scalar", 1);
-    Add_Variable(name, type_index, pointer, scalar, units);
+    Add_Variable<T>(name, type_index, pointer, scalar, units);
 }
 
 // **************************************************************
+template <class T>
 void NetCDF_Out::Add_Variable_1D(const std::string name, const int type_index,
-                        const void *const pointer, const int N, const std::string dim_name,
+                        const T *const pointer, const int N, const std::string dim_name,
                         const std::string units)
 {
     assert(is_opened);
 
     NetCDF_Dimensions tmp_dims;
     tmp_dims.Add(dim_name, N);
-    Add_Variable(name, type_index, pointer, tmp_dims, units);
+    Add_Variable<T>(name, type_index, pointer, tmp_dims, units);
 }
 
 // **************************************************************
@@ -482,6 +507,71 @@ void NetCDF_In::Close()
         call_netcdf_and_test(nc_close(ncid));
     is_opened = false;
 }
+
+
+// **************************************************************
+// Templates specializations
+
+// NetCDF_Out::Add_Variable()
+template void NetCDF_Out::Add_Variable<bool>(const std::string name, const int type_index,
+                                             const bool *const pointer,
+                                             const NetCDF_Dimensions dims,
+                                             const std::string units);
+template void NetCDF_Out::Add_Variable<int>(const std::string name, const int type_index,
+                                            const int *const pointer,
+                                            const NetCDF_Dimensions dims,
+                                            const std::string units);
+template void NetCDF_Out::Add_Variable<unsigned long>(const std::string name, const int type_index,
+                                            const unsigned long *const pointer,
+                                            const NetCDF_Dimensions dims,
+                                            const std::string units);
+template void NetCDF_Out::Add_Variable<float>(const std::string name, const int type_index,
+                                              const float *const pointer,
+                                              const NetCDF_Dimensions dims,
+                                              const std::string units);
+template void NetCDF_Out::Add_Variable<double>(const std::string name, const int type_index,
+                                               const double *const pointer,
+                                               const NetCDF_Dimensions dims,
+                                               const std::string units);
+
+// NetCDF_Out::Add_Variable_Scalar()
+template void NetCDF_Out::Add_Variable_Scalar<bool>(const std::string name, const int type_index,
+                             const bool *const pointer,
+                             const std::string units = "");
+template void NetCDF_Out::Add_Variable_Scalar<int>(const std::string name, const int type_index,
+                             const int *const pointer,
+                             const std::string units = "");
+template void NetCDF_Out::Add_Variable_Scalar<unsigned long>(const std::string name, const int type_index,
+                             const unsigned long *const pointer,
+                             const std::string units = "");
+template void NetCDF_Out::Add_Variable_Scalar<float>(const std::string name, const int type_index,
+                             const float *const pointer,
+                             const std::string units = "");
+template void NetCDF_Out::Add_Variable_Scalar<double>(const std::string name, const int type_index,
+                             const double *const pointer,
+                             const std::string units = "");
+
+// NetCDF_Out::Add_Variable_1D()
+template void NetCDF_Out::Add_Variable_1D<bool>(const std::string name, const int type_index,
+                         const bool *const pointer, const int N,
+                         const std::string dim_name,
+                         const std::string units = "");
+template void NetCDF_Out::Add_Variable_1D<int>(const std::string name, const int type_index,
+                         const int *const pointer, const int N,
+                         const std::string dim_name,
+                         const std::string units = "");
+template void NetCDF_Out::Add_Variable_1D<unsigned long>(const std::string name, const int type_index,
+                         const unsigned long *const pointer, const int N,
+                         const std::string dim_name,
+                         const std::string units = "");
+template void NetCDF_Out::Add_Variable_1D<float>(const std::string name, const int type_index,
+                         const float *const pointer, const int N,
+                         const std::string dim_name,
+                         const std::string units = "");
+template void NetCDF_Out::Add_Variable_1D<double>(const std::string name, const int type_index,
+                         const double *const pointer, const int N,
+                         const std::string dim_name,
+                         const std::string units = "");
 
 #endif // #ifdef NETCDF
 

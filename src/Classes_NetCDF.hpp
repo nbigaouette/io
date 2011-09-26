@@ -9,11 +9,7 @@
 #include <map>
 
 
-#ifdef FLOATTYPE_SINGLE
-#define NC_FDOUBLE NC_FLOAT
-#else
-#define NC_FDOUBLE NC_DOUBLE
-#endif
+#define NC_FDOUBLE -1000
 
 #define netcdf_type_nb      5
 
@@ -58,17 +54,20 @@ private:
     int varid;                              // Variable id
     const void *pointer;                    // Pointer to (read-only) memory
     std::string name;                       // Name
-    int type_index;                         // netcdf_type_*
-    nc_type netcdf_type;                    // NetCDF variable type, value from nc_types const array.
     bool is_committed;                      // Before writting, variable must be committed.
     bool is_compressed;
     NetCDF_Dimensions dimensions;
 
 public:
+    int type_index;                         // netcdf_type_*
+    nc_type netcdf_type;                    // NetCDF variable type, value from nc_types const array.
 
     NetCDF_Variable();
-    NetCDF_Variable(const int &_ncid, const std::string &_name, const void *const _pointer,
-                    const int _type_index, const bool compress = true);
+    template <class T>
+    void Init(const int &_ncid, const std::string &_name,
+              const T *const _pointer,
+              const int _type_index,
+              const bool compress = true);
     void Set_Dimension(const NetCDF_Dimensions &user_dims,
                        const std::map<std::string, int> &commited_dimensions_ids);
     void Units(const std::string units);
@@ -97,16 +96,18 @@ public:
     ~NetCDF_Out();
     void Open(const std::string _filename, const bool netcdf4 = true);
 
+    template <class T>
     void Add_Variable(const std::string name, const int type_index,
-                      const void *const pointer,
+                      const T *const pointer,
                       NetCDF_Dimensions dims,
                       const std::string units = "");
-
+    template <class T>
     void Add_Variable_Scalar(const std::string name, const int type_index,
-                             const void *const pointer,
+                             const T *const pointer,
                              const std::string units = "");
+    template <class T>
     void Add_Variable_1D(const std::string name, const int type_index,
-                         const void *const pointer, const int N,
+                         const T *const pointer, const int N,
                          const std::string dim_name,
                          const std::string units = "");
     void Commit();
