@@ -198,9 +198,7 @@ void NetCDF_Variable::Write()
         call_netcdf_and_test(nc_put_var(ncid, varid, &tmp));
     }
     else
-    {
         call_netcdf_and_test(nc_put_var(ncid, varid, pointer));
-    }
 }
 
 // **************************************************************
