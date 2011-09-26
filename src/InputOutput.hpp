@@ -19,6 +19,8 @@ using namespace boost;
 void Print_Double_in_Binary(double d);
 void Print_Double_in_Binary(float d);
 
+std::string Find_File(std::string filename, const int max_number_up = 2);
+
 
 FILE * Open_File(const std::string &filename, const std::string &mode, const bool quiet = false);
 

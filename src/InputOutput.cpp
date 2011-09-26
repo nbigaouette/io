@@ -5,6 +5,8 @@
 #include <cmath>    // std::abs()
 #include <limits>   // std::numeric_limits<>::max()
 #include <climits> // CHAR_BIT
+#include <sys/stat.h> // Check if folder exists
+
 
 #include <StdCout.hpp>
 
@@ -20,6 +22,25 @@
 #define DEFAULT_BUFFER_SIZE 512
 #endif // #ifdef COMPRESS_OUTPUT
 
+
+// **************************************************************
+std::string Find_File(std::string filename, const int max_number_up)
+{
+    struct stat statBuf;
+    int nb_up = 0;
+    while ((stat(filename.c_str(), &statBuf) != 0) and nb_up < max_number_up)
+    {
+        // File not found, try one folder up
+        filename = "../" + filename;
+        ++nb_up;
+    }
+
+    // File should have been found by now.
+    if (stat(filename.c_str(), &statBuf) != 0)
+        std_cout << "ERROR: Cannot find file " << filename << ". Mayeb try increasing max_number_up(="<<max_number_up<<")?\n";
+
+    return filename;
+}
 
 // **************************************************************
 void Print_Double_in_Binary(double d)
