@@ -173,7 +173,6 @@ void NetCDF_Variable::Commit()
     {
         // Compression cn reduce a file size by a factor of 15!
         //call_netcdf_and_test(nc_def_var_chunking(ncid, varid, 0, &chunks[0]));
-        //call_netcdf_and_test(nc_def_var_deflate(ncid, varid, shuffle, deflate, deflate_level));
         call_netcdf_and_test(nc_def_var_deflate(ncid, varid, C_shuffle, C_deflate, C_deflate_level));
     }
 
