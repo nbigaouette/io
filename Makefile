@@ -51,6 +51,10 @@ include makefiles/Makefile.library
 # to use STL's strings internally.
 CFLAGS          += -DTIXML_USE_STL
 
+### Include NetCDF support
+# The order of the libraries is important!!!
+CFLAGS          += -DNETCDF
+
 
 $(eval $(call Flags_template,stdcout,StdCout.hpp,ssh://optimusprime.selfip.net/git/nicolas/stdcout.git))
 $(eval $(call CFlags_template,assert,Assert.hpp,ssh://optimusprime.selfip.net/git/nicolas/assert.git))
