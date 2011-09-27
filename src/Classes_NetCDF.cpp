@@ -534,41 +534,41 @@ template void NetCDF_Out::Add_Variable<double>(const std::string name, const int
 // NetCDF_Out::Add_Variable_Scalar()
 template void NetCDF_Out::Add_Variable_Scalar<bool>(const std::string name, const int type_index,
                              const bool *const pointer,
-                             const std::string units = "");
+                             const std::string units);
 template void NetCDF_Out::Add_Variable_Scalar<int>(const std::string name, const int type_index,
                              const int *const pointer,
-                             const std::string units = "");
+                             const std::string units);
 template void NetCDF_Out::Add_Variable_Scalar<unsigned long>(const std::string name, const int type_index,
                              const unsigned long *const pointer,
-                             const std::string units = "");
+                             const std::string units);
 template void NetCDF_Out::Add_Variable_Scalar<float>(const std::string name, const int type_index,
                              const float *const pointer,
-                             const std::string units = "");
+                             const std::string units);
 template void NetCDF_Out::Add_Variable_Scalar<double>(const std::string name, const int type_index,
                              const double *const pointer,
-                             const std::string units = "");
+                             const std::string units);
 
 // NetCDF_Out::Add_Variable_1D()
 template void NetCDF_Out::Add_Variable_1D<bool>(const std::string name, const int type_index,
                          const bool *const pointer, const int N,
                          const std::string dim_name,
-                         const std::string units = "");
+                         const std::string units);
 template void NetCDF_Out::Add_Variable_1D<int>(const std::string name, const int type_index,
                          const int *const pointer, const int N,
                          const std::string dim_name,
-                         const std::string units = "");
+                         const std::string units);
 template void NetCDF_Out::Add_Variable_1D<unsigned long>(const std::string name, const int type_index,
                          const unsigned long *const pointer, const int N,
                          const std::string dim_name,
-                         const std::string units = "");
+                         const std::string units);
 template void NetCDF_Out::Add_Variable_1D<float>(const std::string name, const int type_index,
                          const float *const pointer, const int N,
                          const std::string dim_name,
-                         const std::string units = "");
+                         const std::string units);
 template void NetCDF_Out::Add_Variable_1D<double>(const std::string name, const int type_index,
                          const double *const pointer, const int N,
                          const std::string dim_name,
-                         const std::string units = "");
+                         const std::string units);
 
 #endif // #ifdef NETCDF
 
