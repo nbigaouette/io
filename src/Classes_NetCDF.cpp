@@ -3,10 +3,10 @@
 
 #include <vector>
 
-#include "Classes_NetCDF.hpp"
-
 #include <StdCout.hpp>
 
+#include "Classes_NetCDF.hpp"
+#include "InputOutput.hpp"
 
 #define ERR(e) {std_cout << "Error: " << nc_strerror(e) << " ("<<e<<")\n" << std::flush; abort();}
 
@@ -213,9 +213,32 @@ NetCDF_Out::NetCDF_Out()
 }
 
 // **************************************************************
-NetCDF_Out::NetCDF_Out(const std::string _filename, const bool netcdf4)
+NetCDF_Out::NetCDF_Out(const std::string _path, const std::string _filename, const bool netcdf4)
 {
-    Open(_filename, netcdf4);
+    Open(_path, _filename, netcdf4);
+}
+
+// **************************************************************
+NetCDF_Out::NetCDF_Out(std::string _filename, const bool netcdf4)
+{
+    // Extract the path from filename
+    std::string path;
+    size_t found = _filename.rfind("/");
+    if (found != std::string::npos)
+    {
+        // Character "/" was found. So it's a path: extract it
+        path = _filename;
+        path.replace(found, _filename.length()-found, "");
+
+        // Remove path from filename ("+1" to remove the trailing "/")
+        _filename.replace(_filename.find(path), path.length()+1, "");
+    }
+    else
+    {
+        path = ".";
+    }
+
+    Open(path, _filename, netcdf4);
 }
 
 // **************************************************************
@@ -225,14 +248,17 @@ NetCDF_Out::~NetCDF_Out()
 }
 
 // **************************************************************
-void NetCDF_Out::Open(const std::string _filename, const bool netcdf4)
+void NetCDF_Out::Open(const std::string _path, const std::string _filename, const bool netcdf4)
 {
     is_opened    = false;
     is_committed = false;
     is_written   = false;
 
-    filename = _filename;
+    filename = _path + "/" + _filename;
     is_netcdf4 = netcdf4;
+
+    // Make sure output folder exists
+    Create_Folder_If_Does_Not_Exists(_path);
 
     // Open file
     if (is_netcdf4)

@@ -92,9 +92,10 @@ private:
 public:
 
     NetCDF_Out();
-    NetCDF_Out(const std::string _filename, const bool netcdf4 = true);
+    NetCDF_Out(const std::string _path, const std::string _filename, const bool netcdf4 = true);
+    NetCDF_Out(std::string _filename, const bool netcdf4 = true);
     ~NetCDF_Out();
-    void Open(const std::string _filename, const bool netcdf4 = true);
+    void Open(const std::string _path, const std::string _filename, const bool netcdf4 = true);
 
     template <class T>
     void Add_Variable(const std::string name, const int type_index,
