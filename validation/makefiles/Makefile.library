@@ -11,9 +11,9 @@ LIB_OBJ          = $(filter-out $(build_dir)/$(TESTMAIN_BASENAME).o, $(filter-ou
 TESTMAIN_BASENAME = $(subst $(TESTDIRS)/,,$(TESTMAIN))
 
 ### Just build "full" and install
-.PHONY: f
-f:
-	$(MAKE) shared static install $(filter-out f, $(MAKECMDGOALS) )
+.PHONY: f full
+f: full
+full: install_shared install_static force
 
 ### Compilation of main() ###
 $(build_dir)/$(TESTMAIN_BASENAME).o:
