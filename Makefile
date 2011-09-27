@@ -52,7 +52,6 @@ include makefiles/Makefile.library
 CFLAGS          += -DTIXML_USE_STL
 
 ### Include NetCDF support
-# The order of the libraries is important!!!
 CFLAGS          += -DNETCDF
 
 
