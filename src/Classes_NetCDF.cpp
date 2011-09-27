@@ -185,20 +185,7 @@ void NetCDF_Variable::Write()
     if (not is_committed)
         Commit();
 
-    // WARNING: sizeof(bool) == 1 while sizeof(int) == 4 (at least on x86_64)
-    // Writting 4 bytes instead of 1 for the bool will break.
-    if (type_index == netcdf_type_bool)
-    {
-        assert(pointer != NULL);
-
-        // So if writing a bool, store temporarily into an empty integer
-        int tmp = false;
-        if ( *((bool *)pointer) )
-            tmp = true;
-        call_netcdf_and_test(nc_put_var(ncid, varid, &tmp));
-    }
-    else
-        call_netcdf_and_test(nc_put_var(ncid, varid, pointer));
+    call_netcdf_and_test(nc_put_var(ncid, varid, pointer));
 }
 
 // **************************************************************

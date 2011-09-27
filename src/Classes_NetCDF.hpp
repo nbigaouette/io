@@ -32,7 +32,7 @@ const nc_type netcdf_types[netcdf_type_nb] = {
     NC_FDOUBLE,
     NC_FLOAT,
     NC_DOUBLE,
-    NC_INT
+    NC_BYTE // bool
 };
 
 
