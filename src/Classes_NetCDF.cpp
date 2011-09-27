@@ -11,9 +11,11 @@
 #define ERR(e) {std_cout << "Error: " << nc_strerror(e) << " ("<<e<<")\n" << std::flush; abort();}
 
 // Compressiong options
+#ifdef NETCDF4_COMPRESSED
 const int C_shuffle = NC_SHUFFLE;
 const int C_deflate = 1;
 const int C_deflate_level = 9;
+#endif // #ifdef NETCDF4_COMPRESSED
 
 // const bool verbose = true;
 const bool verbose = false;
@@ -94,7 +96,11 @@ void NetCDF_Variable::Init(const int &_ncid, const std::string &_name,
     type_index      = _type_index;
     netcdf_type     = netcdf_types[type_index];
     is_committed    = false;
+#ifdef NETCDF4_COMPRESSED
     is_compressed   = compress;
+#else
+    is_compressed   = false;
+#endif
 }
 
 // **************************************************************
@@ -169,12 +175,14 @@ void NetCDF_Variable::Commit()
 
     free(tmp_ids);
 
+#ifdef NETCDF4_COMPRESSED
     if (is_compressed)
     {
         // Compression cn reduce a file size by a factor of 15!
         //call_netcdf_and_test(nc_def_var_chunking(ncid, varid, 0, &chunks[0]));
         call_netcdf_and_test(nc_def_var_deflate(ncid, varid, C_shuffle, C_deflate, C_deflate_level));
     }
+#endif // #ifdef NETCDF4_COMPRESSED
 
     is_committed = true;
 }
@@ -263,7 +271,11 @@ void NetCDF_Out::Open(const std::string _path, const std::string _filename, cons
     // Open file
     if (is_netcdf4)
     {
+#ifdef NETCDF4_COMPRESSED
         call_netcdf_and_test(nc_create(filename.c_str(), NC_NETCDF4, &ncid));
+#else
+        call_netcdf_and_test(nc_create(filename.c_str(), NC_64BIT_OFFSET, &ncid));
+#endif
     }
     else
     {
