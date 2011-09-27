@@ -19,6 +19,10 @@
 #define netcdf_type_double  3
 #define netcdf_type_bool    4
 
+#ifndef nc_type
+typedef nc_type int;
+#endif // #ifndef nc_type
+
 const char netcdf_types_string[netcdf_type_nb][8] = {
     "int\0   ",
     "fdouble",
