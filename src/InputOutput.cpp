@@ -43,6 +43,27 @@ std::string Find_File(std::string filename, const int max_number_up)
 }
 
 // **************************************************************
+void Create_Folder_If_Does_Not_Exists(const std::string path)
+{
+    struct stat statBuf;
+    if (stat(path.c_str(), &statBuf) < 0)
+    {
+        std::string cmd = "mkdir -p " + path;
+        std_cout
+            << "Folder \"" << path << "\" does not exist!\n"
+            << "The following command will create it:\n"
+            << "    " << cmd << "\n"
+            << "If it fails, create it manually.\n";
+        const int return_value = system(cmd.c_str());
+        if (return_value != 0)
+        {
+            std_cout << "ERROR: Folder '" << path << "' could not be created correclty!\n" << std::flush;
+            abort();
+        }
+    }
+}
+
+// **************************************************************
 void Print_Double_in_Binary(double d)
 /**
  * Prints binary representation of a double

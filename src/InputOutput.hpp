@@ -20,6 +20,7 @@ void Print_Double_in_Binary(double d);
 void Print_Double_in_Binary(float d);
 
 std::string Find_File(std::string filename, const int max_number_up = 2);
+void Create_Folder_If_Does_Not_Exists(const std::string path);
 
 
 FILE * Open_File(const std::string &filename, const std::string &mode, const bool quiet = false);
