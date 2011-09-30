@@ -13,7 +13,7 @@ TESTMAIN_BASENAME = $(subst $(TESTDIRS)/,,$(TESTMAIN))
 ### Just build "full" and install
 .PHONY: f full
 f: full
-full: install_shared install_static force
+full: install_shared install_static install_headers force
 
 ### Compilation of main() ###
 $(build_dir)/$(TESTMAIN_BASENAME).o:
