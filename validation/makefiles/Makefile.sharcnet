@@ -6,7 +6,7 @@ CC              := cc
 CPP             := CC
 CFLAGS          := -O0 -g -DYDEBUG
 
-RPATH           :=
+RPATH           := -Wl,-R
 LibMath         := -lm
 LDFLAGS         :=
 OMP_CFLAGS      := -mp
