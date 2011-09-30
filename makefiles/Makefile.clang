@@ -16,7 +16,7 @@ CFLAGS          += -Wformat=2 -Wno-format-extra-args -Wformat-security -Wformat-
 CFLAGS          += -Wuninitialized -Winit-self
 CFLAGS          += -Wmissing-include-dirs -Wfloat-equal -Wshadow -Winline
 # CFLAGS          += -Wconversion
-CFLAGS          += -Wunreachable-code
+# CFLAGS          += -Wunreachable-code
 # CFLAGS          += -Wno-unused-variable  # Disable: "warning: unused variable [...]"
 CFLAGS          += -Wno-unused-parameter # Disable: "warning: unused parameter [...]"
 CFLAGS          += -Wno-unknown-pragmas
