@@ -715,7 +715,7 @@ TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
             != TIXML_SUCCESS
             )
         {
-            DEBUGP("ERROR: XML_Get_SubNode_Matching_Attribute() failed!\n");
+            DEBUGP("ERROR: ReadXML::Get_SubNode_Matching_Attribute() failed!\n");
             std_cout
                 << "root: <" << root->Value() << "> (" << root << "), "
                 << "elements: " << elements << ", "
@@ -730,15 +730,14 @@ TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
     );
     if (subnode == NULL)
     {
-        DEBUGP("ERROR: XML_Get_SubNode_Matching_Attribute() failed!\n");
+        DEBUGP("ERROR: ReadXML::Get_SubNode_Matching_Attribute() failed!\n");
         std_cout << "elements = " << elements << "\n"
                  << "attribute = " << attribute << "\n"
                  << "attribute_value = " << attribute_value << "\n"
                  << std::flush;
         abort();
     }
-    else
-        return subnode;
+    return subnode;
 }
 
 // **************************************************************
@@ -762,7 +761,7 @@ TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
             != TIXML_SUCCESS
         )
         {
-            DEBUGP("ERROR: XML_Get_SubNode_Matching_Attribute() (2) failed\n");
+            DEBUGP("ERROR: ReadXML::Get_SubNode_Matching_Attribute() (2) failed\n");
             std_cout
                 << "root: <" << root->Value() << "> (" << root << "), "
                 << "elements: " << elements << ", "
@@ -781,11 +780,16 @@ TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
     );
     if (subnode == NULL)
     {
-        std_cout << std::flush;
+        DEBUGP("ERROR: ReadXML::Get_SubNode_Matching_Attribute() failed!\n");
+        std_cout << "elements = " << elements << "\n"
+                 << "attribute1 = " << attribute1 << "\n"
+                 << "attribute1_value = " << attribute1_value << "\n"
+                 << "attribute2 = " << attribute2 << "\n"
+                 << "attribute2_value = " << attribute2_value << "\n"
+                 << std::flush;
         abort();
     }
-    else
-        return subnode;
+    return subnode;
 }
 
 // **************************************************************
@@ -816,11 +820,14 @@ TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
 
     if (subnode == NULL)
     {
-        std_cout << std::flush;
+        DEBUGP("ERROR: ReadXML::Get_SubNode_Matching_Attribute() failed!\n");
+        std_cout << "elements = " << elements << "\n"
+                 << "attribute = " << attribute << "\n"
+                 << "attribute_value = " << attribute_value << "\n"
+                 << std::flush;
         abort();
     }
-    else
-        return subnode;
+    return subnode;
 }
 
 // **************************************************************
