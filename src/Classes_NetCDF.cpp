@@ -163,7 +163,7 @@ void NetCDF_Variable::Commit()
         nc_def_var(
             ncid,                       // File id
             name.c_str(),               // Variable's name
-            netcdf_type,                // Variable's type
+            (nc_type) netcdf_type,      // Variable's type
             int(dimensions.ids.size()), // Number of dimension
             &(dimensions.ids[0]),       // Array (contiguous) of dimension ids
             &varid                      // Variable id (function's output)
@@ -193,7 +193,27 @@ void NetCDF_Variable::Write()
     if (not is_committed)
         Commit();
 
+#ifdef NC_NETCDF4
     call_netcdf_and_test(nc_put_var(ncid, varid, pointer));
+#else
+    // Stupid NetCDF v3.6 does not know about nc_put_var()
+    if      (type_index == netcdf_type_int)
+        call_netcdf_and_test( nc_put_var_int(ncid, varid, (const int *)   pointer) );
+    else if (type_index == netcdf_type_fdouble)
+    {
+        std_cout << "ERROR in NetCDF_Variable::Write(): The variable's type is still 'fdouble' when NetCDF_Out::Add_Variable() should have changed it!\n" << std::flush;
+        abort();
+    }
+    else if (type_index == netcdf_type_float)
+        call_netcdf_and_test( nc_put_var_float(ncid, varid, (const float *) pointer) );
+    else if (type_index == netcdf_type_double)
+        call_netcdf_and_test( nc_put_var_double(ncid, varid, (const double *)pointer) );
+    else if (type_index == netcdf_type_bool)
+    {
+        std_cout << "ERROR in NetCDF_Variable::Write(): NetCDF version 3 cannot write booleans!\n" << std::flush;
+        abort();
+    }
+#endif // #ifdef NC_NETCDF4
 }
 
 // **************************************************************
@@ -519,7 +539,20 @@ void NetCDF_In::Read(const std::string variable_name, void * const pointer)
     call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid) );
 
    // Read the data.
-   call_netcdf_and_test( nc_get_var(ncid, varid, pointer) );
+// #ifdef NetCDF_36
+//     std_cout << "ERROR in NetCDF_In::Read(): NetCDF v3.6 version of NetCDF_In::Read() not written!\n" << std::flush;
+//     abort();
+// #else
+//     call_netcdf_and_test( nc_get_var(ncid, varid, pointer) );
+// #endif // #ifdef NetCDF_36
+
+// #ifdef NC_NETCDF4
+#ifdef NetCDF_version4
+    call_netcdf_and_test( nc_get_var(ncid, varid, pointer) );
+#else
+    std_cout << "ERROR in NetCDF_In::Read(): NetCDF v3.6 version of NetCDF_In::Read() not written!\n" << std::flush;
+    abort();
+#endif // #ifdef NC_NETCDF4
 }
 
 // **************************************************************
