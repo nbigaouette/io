@@ -37,7 +37,7 @@ std::string Find_File(std::string filename, const int max_number_up)
 
     // File should have been found by now.
     if (stat(filename.c_str(), &statBuf) != 0)
-        std_cout << "ERROR: Cannot find file " << filename << ". Mayeb try increasing max_number_up(="<<max_number_up<<")?\n";
+        std_cout << "ERROR: Cannot find file " << filename << ". Maybe try increasing max_number_up(="<<max_number_up<<")?\n";
 
     return filename;
 }
