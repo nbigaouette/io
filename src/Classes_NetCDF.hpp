@@ -6,6 +6,7 @@
 #include <netcdf.h>
 
 #include <string>
+#include <vector>
 #include <map>
 
 

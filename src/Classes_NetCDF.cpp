@@ -1,8 +1,6 @@
 
 #ifdef NETCDF
 
-#include <vector>
-
 #include <StdCout.hpp>
 
 #include "Classes_NetCDF.hpp"
