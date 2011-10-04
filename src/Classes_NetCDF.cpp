@@ -314,6 +314,7 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
                               const std::string units)
 {
     assert(is_opened);
+    assert(pointer != NULL);
 
     if (verbose)
         std_cout << "NetCDF_Out::Add_Variable() Adding variable '" << name << "' of type '" << type_index << "' (" << netcdf_types_string[type_index] << ") to  file '" << filename << "'...\n";
@@ -543,6 +544,7 @@ NetCDF_In::~NetCDF_In()
 void NetCDF_In::Read(const std::string variable_name, void * const pointer)
 {
     assert(is_opened);
+    assert(pointer != NULL);
 
     int varid;
 
