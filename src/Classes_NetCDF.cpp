@@ -454,7 +454,7 @@ void NetCDF_Out::Add_Variable(const std::string name,
 {
     assert(is_opened);
 
-    const int N = string_to_save.size();
+    const int N = int(string_to_save.size());
 
     std::ostringstream string_length;
     string_length << "string" << N;
