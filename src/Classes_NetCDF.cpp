@@ -195,20 +195,47 @@ void NetCDF_Variable::Write()
     call_netcdf_and_test(nc_put_var(ncid, varid, pointer));
 #else
     // Stupid NetCDF v3.6 does not know about nc_put_var()
-    if      (type_index == netcdf_type_int)
-        call_netcdf_and_test( nc_put_var_int(ncid, varid, (const int *)   pointer) );
+    if      (type_index == netcdf_type_bool)
+        call_netcdf_and_test( nc_put_var_schar( ncid, varid,    (const signed char *)pointer) );
+    else if (type_index == netcdf_type_byte)
+        call_netcdf_and_test( nc_put_var_schar( ncid, varid,    (const signed char *)pointer) );
+    else if (type_index == netcdf_type_ubyte)
+        call_netcdf_and_test( nc_put_var_uchar( ncid, varid,    (const unsigned char *)pointer) );
+    else if (type_index == netcdf_type_char)
+        call_netcdf_and_test( nc_put_var_text(  ncid, varid,    (const char *)pointer) );
+    else if (type_index == netcdf_type_short)
+        call_netcdf_and_test( nc_put_var_short( ncid, varid,    (const short int *)pointer) );
+    else if (type_index == netcdf_type_ushort)
+        call_netcdf_and_test( nc_put_var_ushort(ncid, varid,    (const unsigned short int *)pointer) );
+    else if (type_index == netcdf_type_int)
+        call_netcdf_and_test( nc_put_var_int(   ncid, varid,    (const int *)pointer) );
+    else if (type_index == netcdf_type_uint)
+        call_netcdf_and_test( nc_put_var_uint(  ncid, varid,    (const unsigned int *)pointer) );
+    else if (type_index == netcdf_type_uint64)
+    {
+        std_cout << "ERROR in NetCDF_Variable::Write(): NetCDF v3 does not support uint64 type.\n" << std::flush;
+        abort();
+    }
+    else if (type_index == netcdf_type_int64)
+    {
+        std_cout << "ERROR in NetCDF_Variable::Write(): NetCDF v3 does not support int64 type.\n" << std::flush;
+        abort();
+    }
+    else if (type_index == netcdf_type_float)
+        call_netcdf_and_test( nc_put_var_float( ncid, varid,    (const float *) pointer) );
+    else if (type_index == netcdf_type_double)
+        call_netcdf_and_test( nc_put_var_double(ncid, varid,    (const double *)pointer) );
     else if (type_index == netcdf_type_fdouble)
     {
         std_cout << "ERROR in NetCDF_Variable::Write(): The variable's type is still 'fdouble' when NetCDF_Out::Add_Variable() should have changed it!\n" << std::flush;
         abort();
     }
-    else if (type_index == netcdf_type_float)
-        call_netcdf_and_test( nc_put_var_float(ncid, varid, (const float *) pointer) );
-    else if (type_index == netcdf_type_double)
-        call_netcdf_and_test( nc_put_var_double(ncid, varid, (const double *)pointer) );
-    else if (type_index == netcdf_type_bool)
+
+    else if (type_index == netcdf_type_string)
+        call_netcdf_and_test( nc_put_var_text(  ncid, varid,    (const char *)pointer) );
+    else
     {
-        std_cout << "ERROR in NetCDF_Variable::Write(): NetCDF version 3 cannot write booleans!\n" << std::flush;
+        std_cout << "ERROR in NetCDF_Variable::Write(): Variable type not supported! (type_index=="<<type_index<<")\n" << std::flush;
         abort();
     }
 #endif // #ifdef NC_NETCDF4
