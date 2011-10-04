@@ -421,6 +421,19 @@ void NetCDF_Out::Add_Variable_1D(const std::string name, const int type_index,
 }
 
 // **************************************************************
+void NetCDF_Out::Add_Variable(const std::string name,
+                              const std::string string_to_save)
+{
+    assert(is_opened);
+
+    const int N = string_to_save.size();
+
+    std::ostringstream string_length;
+    string_length << "string" << N;
+    Add_Variable_1D<char>(name, netcdf_type_char, string_to_save.c_str(), N, string_length.str());
+}
+
+// **************************************************************
 void NetCDF_Out::Commit()
 {
     if (verbose and is_opened)

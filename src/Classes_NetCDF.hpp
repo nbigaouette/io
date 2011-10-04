@@ -12,20 +12,22 @@
 
 #define NC_FDOUBLE -1000
 
-#define netcdf_type_nb      5
+#define netcdf_type_nb      6
 
 #define netcdf_type_int     0
 #define netcdf_type_fdouble 1
 #define netcdf_type_float   2
 #define netcdf_type_double  3
 #define netcdf_type_bool    4
+#define netcdf_type_char    5
 
 const char netcdf_types_string[netcdf_type_nb][8] = {
     "int\0   ",
     "fdouble",
     "float\0 ",
     "double\0",
-    "bool\0  "
+    "bool\0  ",
+    "char\0  "
 };
 
 // NetCDF v3.6 defines "nc_type" as an enum, which screws everything.
@@ -43,7 +45,8 @@ const my_nc_type netcdf_types[netcdf_type_nb] = {
     NC_FDOUBLE,
     NC_FLOAT,
     NC_DOUBLE,
-    NC_BYTE // bool
+    NC_BYTE, // bool,
+    NC_CHAR
 };
 
 
@@ -122,6 +125,8 @@ public:
                          const T *const pointer, const int N,
                          const std::string dim_name,
                          const std::string units = "");
+    void Add_Variable(const std::string name,
+                      const std::string string_to_save);
     void Commit();
     void Write();
     void Close();
