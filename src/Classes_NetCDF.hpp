@@ -12,22 +12,53 @@
 
 #define NC_FDOUBLE -1000
 
-#define netcdf_type_nb      6
+// http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-c/NetCDF_002d4-Atomic-Types.html#NetCDF_002d4-Atomic-Types
+// Type                C #define   Bits
+// byte                NC_BYTE      8
+// unsigned byte       NC_UBYTE^    8
+// char                NC_CHAR      8
+// short               NC_SHORT     16
+// unsigned short      NC_USHORT^   16
+// int                 NC_INT       32
+// unsigned int        NC_UINT^     32
+// unsigned long long  NC_UINT64^   64
+// long long           NC_INT64^    64
+// float               NC_FLOAT     32
+// double              NC_DOUBLE    64
+// char **             NC_STRING^  string length + 1
 
-#define netcdf_type_int     0
-#define netcdf_type_fdouble 1
-#define netcdf_type_float   2
-#define netcdf_type_double  3
-#define netcdf_type_bool    4
-#define netcdf_type_char    5
+#define netcdf_type_nb          14
 
-const char netcdf_types_string[netcdf_type_nb][8] = {
-    "int\0   ",
-    "fdouble",
-    "float\0 ",
-    "double\0",
-    "bool\0  ",
-    "char\0  "
+#define netcdf_type_bool         0
+#define netcdf_type_byte         1
+#define netcdf_type_ubyte        2
+#define netcdf_type_char         3
+#define netcdf_type_short        4
+#define netcdf_type_ushort       5
+#define netcdf_type_int          6
+#define netcdf_type_uint         7
+#define netcdf_type_uint64       8
+#define netcdf_type_int64        9
+#define netcdf_type_float       10
+#define netcdf_type_double      11
+#define netcdf_type_fdouble     12
+#define netcdf_type_string      13
+
+const char netcdf_types_string[netcdf_type_nb][11] = {
+    "bool\0     ",
+    "byte\0     ",
+    "ubyte\0    ",
+    "char\0     ",
+    "short\0    ",
+    "ushort\0   ",
+    "int\0      ",
+    "uint\0     ",
+    "uint64\0   ",
+    "int64\0    ",
+    "float\0    ",
+    "double\0   ",
+    "fdouble\0  ",
+    "string\0   "
 };
 
 // NetCDF v3.6 defines "nc_type" as an enum, which screws everything.
@@ -41,12 +72,20 @@ typedef int my_nc_type;
 #endif // #ifndef nc_type
 
 const my_nc_type netcdf_types[netcdf_type_nb] = {
+    NC_BYTE, // bool
+    NC_BYTE,
+    NC_UBYTE,
+    NC_CHAR,
+    NC_SHORT,
+    NC_USHORT,
     NC_INT,
-    NC_FDOUBLE,
+    NC_UINT,
+    NC_UINT64,
+    NC_INT64,
     NC_FLOAT,
     NC_DOUBLE,
-    NC_BYTE, // bool,
-    NC_CHAR
+    NC_FDOUBLE,
+    NC_STRING
 };
 
 
