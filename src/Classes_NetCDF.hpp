@@ -146,6 +146,7 @@ public:
     ~NetCDF_In();
     void Open(const std::string _filename);
     void Read(const std::string variable_name, void * const pointer);
+    void Read(const std::string variable_name, std::string &content);
     void Close();
 
 };

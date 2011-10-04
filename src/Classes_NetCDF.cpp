@@ -569,6 +569,35 @@ void NetCDF_In::Read(const std::string variable_name, void * const pointer)
 }
 
 // **************************************************************
+void NetCDF_In::Read(const std::string variable_name, std::string &content)
+{
+    assert(is_opened);
+
+    // Read the character array size (its dimension), allocate enough room in the
+    // string and then read the content.
+
+    // Get the varid of the data variable, based on its name.
+    int varid;
+    call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid) );
+
+#ifdef NetCDF_version4
+
+    // FIXME: Read the string size from the variable's dimension,
+    //        See nc_inq_vardimid() and nc_inq_varndims()
+    //        For now, just use a temporary that is big enough.
+    const int max_string_size = 4096;
+    char *cstring = (char *) calloc(max_string_size+1, sizeof(char));
+    assert(cstring != NULL);
+
+    call_netcdf_and_test( nc_get_var(ncid, varid, cstring) );
+    content = std::string(cstring);
+#else
+    std_cout << "ERROR in NetCDF_In::Read(): NetCDF v3.6 version of NetCDF_In::Read() not written (std::string version)!\n" << std::flush;
+    abort();
+#endif // #ifdef NC_NETCDF4
+}
+
+// **************************************************************
 void NetCDF_In::Close()
 {
     if (is_opened)
