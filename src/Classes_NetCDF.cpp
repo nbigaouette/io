@@ -606,14 +606,6 @@ void NetCDF_In::Read(const std::string variable_name, void * const pointer)
     // Get the varid of the data variable, based on its name.
     call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid) );
 
-   // Read the data.
-// #ifdef NetCDF_36
-//     std_cout << "ERROR in NetCDF_In::Read(): NetCDF v3.6 version of NetCDF_In::Read() not written!\n" << std::flush;
-//     abort();
-// #else
-//     call_netcdf_and_test( nc_get_var(ncid, varid, pointer) );
-// #endif // #ifdef NetCDF_36
-
 // #ifdef NC_NETCDF4
 #ifdef NetCDF_version4
     call_netcdf_and_test( nc_get_var(ncid, varid, pointer) );
