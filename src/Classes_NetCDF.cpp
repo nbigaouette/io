@@ -631,10 +631,10 @@ void NetCDF_In::Read(const std::string variable_name, std::string &content)
     call_netcdf_and_test( nc_inq_dimlen(ncid, dimid, &string_length) );
 
     // Resize string
-    variable.resize(string_length);
+    content.resize(string_length);
 
 #ifdef NetCDF_version4
-    call_netcdf_and_test( nc_get_var(ncid, varid, (void *) variable_name.c_str() ) );
+    call_netcdf_and_test( nc_get_var(ncid, varid, (void *) content.c_str() ) );
 #else
     std_cout << "ERROR in NetCDF_In::Read(std::string): NetCDF v3.6 version of NetCDF_In::Read() not written!\n" << std::flush;
     abort();
