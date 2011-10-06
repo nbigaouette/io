@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 
 #define NC_FDOUBLE -1000
@@ -141,6 +142,8 @@ private:
     bool is_written;
     std::map<std::string, int> dimensions_val;
     std::map<std::string, int> dimensions_ids;
+
+    std::set<uint64_t> previous_variables_ptr;
 
 public:
 
