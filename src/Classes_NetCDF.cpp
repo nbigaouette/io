@@ -620,21 +620,16 @@ void NetCDF_In::Read(const std::string variable_name, std::string &content)
 {
     assert(is_opened);
 
-    int varid, dimid;
-    size_t string_length;
+    int varid;
 
     // Get the varid of the data variable, based on its name.
     call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid) );
 
-    // Get stored string size
-    call_netcdf_and_test( nc_inq_dimid(ncid,  variable_name.c_str(), &dimid) );
-    call_netcdf_and_test( nc_inq_dimlen(ncid, dimid, &string_length) );
-
-    // Resize string
-    content.resize(string_length);
-
 #ifdef NetCDF_version4
-    call_netcdf_and_test( nc_get_var(ncid, varid, (void *) content.c_str() ) );
+    char *content_temp = (char *)calloc(4096, sizeof(char));
+    call_netcdf_and_test( nc_get_var(ncid, varid, (void *) content_temp ) );
+    content = std::string(content_temp);
+    free(content_temp);
 #else
     std_cout << "ERROR in NetCDF_In::Read(std::string): NetCDF v3.6 version of NetCDF_In::Read() not written!\n" << std::flush;
     abort();
