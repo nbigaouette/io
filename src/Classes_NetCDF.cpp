@@ -176,9 +176,12 @@ void NetCDF_Variable::Commit()
 #ifdef NETCDF4_COMPRESSED
     if (is_compressed)
     {
-        // Compression cn reduce a file size by a factor of 15!
-        //call_netcdf_and_test(nc_def_var_chunking(ncid, varid, 0, &chunks[0]));
-        call_netcdf_and_test(nc_def_var_deflate(ncid, varid, C_shuffle, C_deflate, C_deflate_level));
+        if (dimensions.ids.size() > 1 and dimensions.Ns[0] > 1)
+        {
+            // Compression can reduce a file size by a factor of 15!
+            //call_netcdf_and_test(nc_def_var_chunking(ncid, varid, 0, &chunks[0]));
+            call_netcdf_and_test(nc_def_var_deflate(ncid, varid, C_shuffle, C_deflate, C_deflate_level));
+        }
     }
 #endif // #ifdef NETCDF4_COMPRESSED
 
