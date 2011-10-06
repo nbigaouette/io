@@ -459,7 +459,7 @@ void NetCDF_Out::Add_Variable_Scalar(const std::string name, const int type_inde
     assert(is_opened);
 
     NetCDF_Dimensions scalar;
-    scalar.Add("scalar", 1);
+    scalar.Add("scalar", 0);
     Add_Variable<T>(name, type_index, pointer, scalar, units);
 }
 
