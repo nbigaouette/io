@@ -349,7 +349,8 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
     assert(pointer != NULL);
 
     if (verbose)
-        std_cout << "NetCDF_Out::Add_Variable() Adding variable '" << name << "' of type '" << type_index << "' (" << netcdf_types_string[type_index] << ") to  file '" << filename << "'...\n";
+        log("NetCDF_Out::Add_Variable() Adding variable '%s' (%p) of type '%d' (%s) to  file '%s'...\n",
+            name.c_str(), pointer, type_index, netcdf_types_string[type_index], filename.c_str());
 
     // The actual write to the file will take place at Close() (or Write() more precisely) and
     // not when calling Add_Variable(). This is because all metadata of the file needs to be
@@ -363,14 +364,16 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
     }
     else
     {
-        std_cout
-            << "ERROR: Two variables were added using NetCDF_Out::Add_Variable() using the same pointer!\n"
-            << "       This will not work as NetCDF_Out::Add_Variable() just creates the variable's metada.\n"
-            << "       The data will only be written to disk when NetCDF_Out::Close() is called (or at\n"
-            << "       destructor). If two variables use the same pointer, the same data will be written for\n"
-            << "       both variable!\n"
-            << "       Please fix your code.\n"
-            << std::flush;
+        log("ERROR: Two variables were added using NetCDF_Out::Add_Variable() using the same pointer!\n");
+        log("       This will not work as NetCDF_Out::Add_Variable() just creates the variable's metada.\n");
+        log("       The data will only be written to disk when NetCDF_Out::Close() is called (or at\n");
+        log("       destructor). If two variables use the same pointer, the same data will be written for\n");
+        log("       both variable!\n");
+        log("       Variable names:\n");
+        log("            Inserting:        %p %s\n", pointer, name.c_str());
+        log("            Already inserted: %p\n", *it);
+        log("       Please fix your code.\n");
+        std_cout << std::flush;
         abort();
     }
 
