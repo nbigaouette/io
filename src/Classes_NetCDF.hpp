@@ -4,6 +4,7 @@
 #ifdef NETCDF
 
 #include <netcdf.h>
+#include <stdint.h> // (u)int64_t
 
 #include <string>
 #include <vector>
