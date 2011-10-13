@@ -20,6 +20,22 @@ const int C_deflate_level = 9;
 // const bool verbose = true;
 const bool verbose = false;
 
+namespace Classes_NetCDF
+{
+    // **************************************************************
+    inline std::string Pause(std::string msg = std::string(""))
+    {
+        std::string answer;
+        if (msg != std::string(""))
+        {
+            std_cout << msg << std::endl;
+        }
+        getline(std::cin, answer);
+
+        return answer;
+    }
+}
+
 // **************************************************************
 void call_netcdf_and_test(const int netcdf_retval)
 {
@@ -374,6 +390,7 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
         log("            Already inserted: %p\n", *it);
         log("       Please fix your code.\n");
         std_cout << std::flush;
+        Classes_NetCDF::Pause();
         abort();
     }
 
