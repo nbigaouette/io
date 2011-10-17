@@ -3,6 +3,8 @@
 # Nicolas Bigaouette, July 2008
 #################################################################
 
+SHELL = /bin/bash
+
 host=$(shell uname -n)
 arch=$(shell uname -m)
 os=$(shell uname)
