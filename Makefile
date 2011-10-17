@@ -53,8 +53,6 @@ CFLAGS          += -DTIXML_USE_STL
 
 ### Include NetCDF support
 CFLAGS          += -DNETCDF
-# Compress netcdf files? Requires netcdf4
-CFLAGS          += -DNETCDF4_COMPRESSED
 
 
 $(eval $(call Flags_template,stdcout,StdCout.hpp,ssh://optimusprime.selfip.net/git/nicolas/stdcout.git))
