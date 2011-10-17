@@ -291,6 +291,10 @@ void NetCDF_Out::Open(const std::string _path, const std::string _filename, cons
 
     is_opened    = true;
 
+    // Disable filling. We will be writting right away, so filling is useless.
+    int old_modep;
+    call_netcdf_and_test( nc_set_fill (ncid, NC_NOFILL, &old_modep) );
+
     if (verbose)
         std_cout << "File '" << filename << "' opened with id '" << ncid << "'.\n";
 }
