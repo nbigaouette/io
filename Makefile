@@ -51,6 +51,10 @@ include makefiles/Makefile.library
 # to use STL's strings internally.
 CFLAGS          += -DTIXML_USE_STL
 
+ifeq ($(host),supermicro3)
+# On supermicro3, netcdf is installed locally.
+CFLAGS          += -I${HOME}/usr/$(host)/include
+endif
 ### Include NetCDF support
 CFLAGS          += -DNETCDF
 
