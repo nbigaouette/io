@@ -337,11 +337,7 @@ void NetCDF_Out::Open(const std::string _path, const std::string _filename, cons
     // Open file
     if (is_netcdf4)
     {
-#ifdef NETCDF4_COMPRESSED
         call_netcdf_and_test(nc_create(filename.c_str(), NC_NETCDF4, &ncid));
-#else
-        call_netcdf_and_test(nc_create(filename.c_str(), NC_64BIT_OFFSET, &ncid));
-#endif
     }
     else
     {
