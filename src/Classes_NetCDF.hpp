@@ -63,17 +63,7 @@ const char netcdf_types_string[netcdf_type_nb][11] = {
     "string\0   "
 };
 
-// NetCDF v3.6 defines "nc_type" as an enum, which screws everything.
-// NetCDF 4 does the right thing of using a typdef.
-// So detect which one the code is compiled with.
-#ifdef NC_NETCDF4
-#define NetCDF_version4
-typedef nc_type my_nc_type;
-#else // #ifndef NC_NETCDF4
-typedef int my_nc_type;
-#endif // #ifndef nc_type
-
-const my_nc_type netcdf_types[netcdf_type_nb] = {
+const nc_type netcdf_types[netcdf_type_nb] = {
     NC_BYTE, // bool
     NC_BYTE,
     NC_UBYTE,
@@ -115,7 +105,7 @@ private:
 
 public:
     int type_index;                         // netcdf_type_*
-    my_nc_type netcdf_type;                 // NetCDF variable type, value from nc_types const array.
+    nc_type netcdf_type;                 // NetCDF variable type, value from nc_types const array.
 
     NetCDF_Variable();
     template <class T>

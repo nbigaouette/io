@@ -11,11 +11,9 @@
 #define ERR(e) {std_cout << "Error: " << nc_strerror(e) << " ("<<e<<")\n" << std::flush; abort();}
 
 // Compressiong options
-#ifdef NETCDF4_COMPRESSED
 const int C_shuffle = NC_SHUFFLE;
 const int C_deflate = 1;
 const int C_deflate_level = 9;
-#endif // #ifdef NETCDF4_COMPRESSED
 
 // const bool verbose = true;
 const bool verbose = false;
@@ -112,11 +110,7 @@ void NetCDF_Variable::Init(const int &_ncid, const std::string &_name,
     type_index      = _type_index;
     netcdf_type     = netcdf_types[type_index];
     is_committed    = false;
-#ifdef NETCDF4_COMPRESSED
     is_compressed   = compress;
-#else
-    is_compressed   = false;
-#endif
 }
 
 // **************************************************************
@@ -191,7 +185,6 @@ void NetCDF_Variable::Commit()
 
     free(tmp_ids);
 
-#ifdef NETCDF4_COMPRESSED
     if (is_compressed)
     {
         if (dimensions.ids.size() > 1 and dimensions.Ns[0] > 1)
@@ -201,7 +194,6 @@ void NetCDF_Variable::Commit()
             call_netcdf_and_test(nc_def_var_deflate(ncid, varid, C_shuffle, C_deflate, C_deflate_level));
         }
     }
-#endif // #ifdef NETCDF4_COMPRESSED
 
     is_committed = true;
 }
@@ -212,54 +204,7 @@ void NetCDF_Variable::Write()
     if (not is_committed)
         Commit();
 
-#ifdef NC_NETCDF4
     call_netcdf_and_test(nc_put_var(ncid, varid, pointer));
-#else
-    // Stupid NetCDF v3.6 does not know about nc_put_var()
-    if      (type_index == netcdf_type_bool)
-        call_netcdf_and_test( nc_put_var_schar( ncid, varid,    (const signed char *)pointer) );
-    else if (type_index == netcdf_type_byte)
-        call_netcdf_and_test( nc_put_var_schar( ncid, varid,    (const signed char *)pointer) );
-    else if (type_index == netcdf_type_ubyte)
-        call_netcdf_and_test( nc_put_var_uchar( ncid, varid,    (const unsigned char *)pointer) );
-    else if (type_index == netcdf_type_char)
-        call_netcdf_and_test( nc_put_var_text(  ncid, varid,    (const char *)pointer) );
-    else if (type_index == netcdf_type_short)
-        call_netcdf_and_test( nc_put_var_short( ncid, varid,    (const short int *)pointer) );
-    else if (type_index == netcdf_type_ushort)
-        call_netcdf_and_test( nc_put_var_ushort(ncid, varid,    (const unsigned short int *)pointer) );
-    else if (type_index == netcdf_type_int)
-        call_netcdf_and_test( nc_put_var_int(   ncid, varid,    (const int *)pointer) );
-    else if (type_index == netcdf_type_uint)
-        call_netcdf_and_test( nc_put_var_uint(  ncid, varid,    (const unsigned int *)pointer) );
-    else if (type_index == netcdf_type_uint64)
-    {
-        std_cout << "ERROR in NetCDF_Variable::Write(): NetCDF v3 does not support uint64 type.\n" << std::flush;
-        abort();
-    }
-    else if (type_index == netcdf_type_int64)
-    {
-        std_cout << "ERROR in NetCDF_Variable::Write(): NetCDF v3 does not support int64 type.\n" << std::flush;
-        abort();
-    }
-    else if (type_index == netcdf_type_float)
-        call_netcdf_and_test( nc_put_var_float( ncid, varid,    (const float *) pointer) );
-    else if (type_index == netcdf_type_double)
-        call_netcdf_and_test( nc_put_var_double(ncid, varid,    (const double *)pointer) );
-    else if (type_index == netcdf_type_fdouble)
-    {
-        std_cout << "ERROR in NetCDF_Variable::Write(): The variable's type is still 'fdouble' when NetCDF_Out::Add_Variable() should have changed it!\n" << std::flush;
-        abort();
-    }
-
-    else if (type_index == netcdf_type_string)
-        call_netcdf_and_test( nc_put_var_text(  ncid, varid,    (const char *)pointer) );
-    else
-    {
-        std_cout << "ERROR in NetCDF_Variable::Write(): Variable type not supported! (type_index=="<<type_index<<")\n" << std::flush;
-        abort();
-    }
-#endif // #ifdef NC_NETCDF4
 }
 
 // **************************************************************
@@ -622,13 +567,7 @@ void NetCDF_In::Read(const std::string variable_name, void * const pointer)
     // Get the varid of the data variable, based on its name.
     call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid) );
 
-// #ifdef NC_NETCDF4
-#ifdef NetCDF_version4
     call_netcdf_and_test( nc_get_var(ncid, varid, pointer) );
-#else
-    std_cout << "ERROR in NetCDF_In::Read(): NetCDF v3.6 version of NetCDF_In::Read() not written!\n" << std::flush;
-    abort();
-#endif // #ifdef NC_NETCDF4
 }
 
 // **************************************************************
@@ -641,15 +580,10 @@ void NetCDF_In::Read(const std::string variable_name, std::string &content)
     // Get the varid of the data variable, based on its name.
     call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid) );
 
-#ifdef NetCDF_version4
     char *content_temp = (char *)calloc(4096, sizeof(char));
     call_netcdf_and_test( nc_get_var(ncid, varid, (void *) content_temp ) );
     content = std::string(content_temp);
     free(content_temp);
-#else
-    std_cout << "ERROR in NetCDF_In::Read(std::string): NetCDF v3.6 version of NetCDF_In::Read() not written!\n" << std::flush;
-    abort();
-#endif // #ifdef NC_NETCDF4
 }
 
 // **************************************************************
