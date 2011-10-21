@@ -43,6 +43,26 @@ std::string Find_File(std::string filename, const int max_number_up)
 }
 
 // **************************************************************
+void Find_File(char *filename, const int max_number_up, const int max_string_size)
+{
+    struct stat statBuf;
+    int nb_up = 0;
+    char original_fname[max_string_size];
+    strcpy(original_fname,filename);
+    while ((stat(filename, &statBuf) != 0) and nb_up < max_number_up)
+    {
+        // File not found, try one folder up
+        sprintf(filename,"../%s",original_fname);
+	strcpy(original_fname,filename);
+        ++nb_up;
+    }
+
+    // File should have been found by now.
+    if (stat(filename, &statBuf) != 0)
+        std_cout << "ERROR: Cannot find file " << filename << ". Maybe try increasing max_number_up(="<<max_number_up<<")?\n";
+}
+
+// **************************************************************
 void Create_Folder_If_Does_Not_Exists(const std::string path)
 {
     struct stat statBuf;
@@ -305,13 +325,13 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
         else if (using_C_fh)
         {
             C_fh = fopen(filename.c_str(), full_mode.c_str());
-
+std_cout << "File handle is: " << C_fh << " for name " << filename.c_str() << " in mode " << full_mode.c_str() << std::endl;
             // Verify that the file is opened.
             if (C_fh == NULL)
             {
                 if (check_if_file_exists)
                 {
-                    std::cerr << "Could not open file \"" << filename << "\" for '" << full_mode << "'...\n";
+                    std::cerr << "\nCould not open file \"" << filename << "\" for '" << full_mode << "'...\n";
                     std::string answer = Pause("Retry? [y/N]");
                     if (! (answer == "y" || answer == "yes"))
                     {
