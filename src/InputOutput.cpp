@@ -47,8 +47,9 @@ void Find_File(char *filename, const int max_number_up, const int max_string_siz
 {
     struct stat statBuf;
     int nb_up = 0;
-    char original_fname[max_string_size];
-    strcpy(original_fname,filename);
+    char original_fname[4096];
+    strncpy(original_fname,filename,4094);
+    original_fname[4095] = '\0';
     while ((stat(filename, &statBuf) != 0) and nb_up < max_number_up)
     {
         // File not found, try one folder up
