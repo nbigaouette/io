@@ -827,6 +827,9 @@ template void NetCDF_Out::Add_Variable_Scalar<int>(         const std::string na
 template void NetCDF_Out::Add_Variable_Scalar<unsigned int>(const std::string name, const int type_index,
                                                             const unsigned int *const pointer,
                                                             const std::string units);
+template void NetCDF_Out::Add_Variable_Scalar<unsigned long int>(const std::string name, const int type_index,
+                                                            const unsigned long int *const pointer,
+                                                            const std::string units);
 template void NetCDF_Out::Add_Variable_Scalar<uint64_t>(    const std::string name, const int type_index,
                                                             const uint64_t *const pointer,
                                                             const std::string units);
