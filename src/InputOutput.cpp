@@ -862,7 +862,9 @@ std::string ReadXML::Get_String(const std::string element, TiXmlNode *subnode)
     if (subnode != NULL)
     {
         if (subnode->FirstChild() != NULL)
+        {
             buff = std::string(subnode->FirstChild()->Value());
+        }
         else
         {
             std_cout << "ReadXML::Get_String() failed!\n";
