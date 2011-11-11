@@ -127,8 +127,7 @@ class ReadXML
 
         void        Set_String(const std::string element, const std::string value);
 
-        TiXmlNode * Get_SubNode(const std::string elements);
-        TiXmlNode * Get_SubNode(TiXmlNode *subnode, const std::string &celements);
+        TiXmlNode * Get_SubNode(const std::string elements, TiXmlNode *subnode = NULL);
         TiXmlNode * Get_SubNode_Matching_Attribute(TiXmlNode *root,
                                                    const std::string &elements,
                                                    const std::string &attribute,

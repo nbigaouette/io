@@ -679,10 +679,11 @@ void ReadXML::Split_String(const std::string &to_split, const char delimiter, st
 }
 
 // **************************************************************
-TiXmlNode * ReadXML::Get_SubNode(const std::string elements)
+TiXmlNode * ReadXML::Get_SubNode(const std::string elements, TiXmlNode *subnode)
 {
-    // Temporary node
-    TiXmlNode *subnode = RootNode;
+    // If subnode is not specified, start at root
+    if (subnode == NULL)
+        subnode = RootNode;
 
     // Split the XML path string into many substrings, saved in a vector
     std::vector<std::string> subelements;
@@ -690,31 +691,20 @@ TiXmlNode * ReadXML::Get_SubNode(const std::string elements)
 
     for (std::vector<std::string>::iterator it = subelements.begin() ; it < subelements.end() ; it++ )
     {
-        // For each substrings, get the first child
-        subnode = subnode->FirstChild(it->c_str());
-    }
-
-    return subnode;
-}
-
-// **************************************************************
-TiXmlNode * ReadXML::Get_SubNode(TiXmlNode *subnode, const std::string &celements)
-{
-    // Split the XML path string into many substrings, saved in a vector
-    std::vector<std::string> subelements;
-    Split_String(celements, '/', subelements);
-
-    for (std::vector<std::string>::iterator it = subelements.begin() ; it < subelements.end() ; it++ )
-    {
         if (subnode == NULL)
         {
             std_cout
                 << "XML_Get_SubNode() failed!\n"
-                << "Element \"" << celements << "\" not found!\n" << std::flush;
+                << "Element \"" << elements << "\" not found!\n" << std::flush;
                 abort();
         }
-        // For each substrings, get the first child
-        subnode = subnode->FirstChild(it->c_str());
+        // Find the right child before continuing
+        TiXmlNode *subsubnode = NULL;
+        do {
+            subsubnode = subnode->IterateChildren(subsubnode);
+        } while (subsubnode->Value() != *it);
+
+        subnode = subsubnode;
     }
 
     return subnode;
@@ -820,7 +810,7 @@ TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
                                                     const std::string &attribute_value)
 {
     // Get the subnode pointed by "elements"
-    TiXmlNode *subnode = Get_SubNode(root, elements);
+    TiXmlNode *subnode = Get_SubNode(elements, root);
 
     // This is the word after the last "/" in the "elements" string
     std::string string_last_element = std::string(subnode->Value());
@@ -854,8 +844,7 @@ TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
 // **************************************************************
 std::string ReadXML::Get_String(const std::string element, TiXmlNode *subnode)
 {
-    if (subnode == NULL)
-        subnode = Get_SubNode(element);
+    subnode = Get_SubNode(element, subnode);
 
     std::string buff;
 
