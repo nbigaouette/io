@@ -727,6 +727,7 @@ TiXmlNode * ReadXML::Get_SubNode_Matching_Attribute(TiXmlNode *root,
                                                     const int attribute_value)
 {
     TiXmlNode *subnode = root->FirstChild(elements);
+    assert(subnode != NULL);
 
     int int_read = -1;
     do {
