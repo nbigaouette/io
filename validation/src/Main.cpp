@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include <InputOutput.hpp>
+#include <Classes_NetCDF.hpp>
 
 // **************************************************************
 int main(int argc, char *argv[])
@@ -25,8 +26,15 @@ int main(int argc, char *argv[])
     }
 
     delete[] array;
-    
+
     test.Close_File();
+
+
+    NetCDF_Out cdf_file("output/test.cdf");
+
+
+    cdf_file.Close();
+
+
     return EXIT_SUCCESS;
 }
-

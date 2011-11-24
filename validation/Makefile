@@ -32,6 +32,17 @@ LDFLAGS         +=
 
 LINK_PREFERED=static
 
+### Include NetCDF support
+NETCDF_LOCAL_INSTALLATION_MACHINES = supermicro3 cosmos
+ifneq (,$(filter $(host), $(NETCDF_LOCAL_INSTALLATION_MACHINES) ))
+# On these machines, netcdf is installed locally.
+CFLAGS          += -I${HOME}/usr/$(host)/include
+netcdf_LDFLAG   += -L${HOME}/usr/$(host)/lib $(RPATH)${HOME}/usr/$(host)/lib
+endif
+# The order of the libraries is important!!!
+CFLAGS          += -DNETCDF
+netcdf_LDFLAG   += -lnetcdf -lhdf5_hl -lhdf5
+
 # To include a library:
 $(eval $(call Flags_template,inputoutput,InputOutput.hpp,ssh://optimusprime.selfip.net/git/nicolas/io.git))
 $(eval $(call Flags_template,stdcout,StdCout.hpp,ssh://optimusprime.selfip.net/git/nicolas/stdcout.git))
