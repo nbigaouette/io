@@ -33,7 +33,7 @@ ifneq ($(filter optimized, $(MAKECMDGOALS) ),)
 endif
 #################################################################
 # MPI location
-MPILOC          := /usr/lib/intel/openmpi/bin/
+#MPILOC          := /usr/lib/intel/openmpi/bin/
 
 #################################################################
 # FLAGS that should appear, whatever the compilation options
@@ -50,20 +50,6 @@ ifeq ($(LINK_PREFERED), static)
 LDFLAGS         += -static-intel
 endif
 
-GCC_MAJOR       := $(shell gcc -dumpversion | cut -d'.' -f1)
-GCC_MINOR       := $(shell gcc -dumpversion | cut -d'.' -f2)
-GCC_REV         := $(shell gcc -dumpversion | cut -d'.' -f3)
-ifeq ($(GCC_MAJOR).$(GCC_MINOR),4.5)
-GCC34_LOC       := /opt/gcc34
-CFLAGS += -gcc-name=$(GCC34_LOC)/bin/gcc
-CFLAGS += -gxx-name=$(GCC34_LOC)/bin/g++
-endif
-
-# Detect if compilation for library
-ifneq ($(LIB),)
-intel: force
-else
 intel: $(BIN)
-endif
 
 ############ End of file ########################################

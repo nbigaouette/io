@@ -11,23 +11,14 @@ help: force
 	@echo "    gcc          GNU's GCC compiler set"
 	@echo "    intel        Intel's ICC compiler set"
 	@echo "    pgi          Portland Group compiler set"
-	@echo "    sun studioX  Sun's Studio compiler set (where X is 7, 11 or 12)"
+	@echo "    sun studioX  Sun's Studio compiler set (where X is 7,11 or 12)"
 	@echo "Possible compilation options:"
-ifneq ($(LIB),)
-	@echo "    shared       Build shared library"
-	@echo "    static       Build static library"
-endif
 	@echo "    optimized    Optimized build"
 	@echo "    mpi          MPI"
 	@echo "    omp          OpenMP"
 	@echo "    ds           Include debugging symbols"
 	@echo "    prof         Profiling (gcc only)"
 	@echo "    cov          Coverage (gcc only)"
-ifneq ($(LIB),)
-	@echo "    test_static  Test static build"
-	@echo "    test_shared  Test shared build"
-	@echo "    install      Install to $DESTDIR (default to /usr)"
-endif
 	@echo ""
 	@echo "Other possible targets:"
 	@echo "    Please type 'make details' for details"
@@ -36,15 +27,9 @@ endif
 	@echo "http://www.gnu.org/software/make/manual/make.html"
 	@echo ""
 	@echo "Example:"
-ifneq ($(LIB),)
-	@echo "> make clean gcc optimized shared static install"
-	@echo "This will clean, compile using gcc and optimized flags"
-	@echo "the shared and static libraries. Finally it will install"
-else
 	@echo "> make clean gcc optimized run"
 	@echo "This will clean, compile using gcc and optimized flags"
 	@echo "the code and run it."
-endif
 
 details: help
 	@echo ""

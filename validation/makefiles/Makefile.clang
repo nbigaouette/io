@@ -56,20 +56,12 @@ endif
 CFLAGS          += -DCLANG
 
 # http://llvm.org/bugs/show_bug.cgi?id=7069
-GCC_MAJOR       := $(shell gcc -dumpversion | cut -d'.' -f1)
-GCC_MINOR       := $(shell gcc -dumpversion | cut -d'.' -f2)
-GCC_REV         := $(shell gcc -dumpversion | cut -d'.' -f3)
 ifeq ($(GCC_MAJOR).$(GCC_MINOR),4.5)
 GCC34_LOC       := /opt/gcc34
 CFLAGS          += -nostdinc++ -I$(GCC34_LOC)/include/c++/3.4.6 -I$(GCC34_LOC)/include/c++/3.4.6/x86_64-unknown-linux-gnu
 endif
 
-# Detect if compilation for library
-ifneq ($(LIB),)
-clang: force
-else
 clang: $(BIN)
-endif
 prof: clang
 cov: clang
 

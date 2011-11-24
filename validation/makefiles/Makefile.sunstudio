@@ -98,13 +98,7 @@ ifeq ($(arch),sun4u)
     LDFLAGS     += -xcode=pic32
 endif
 
-# Detect if compilation for library
-ifneq ($(LIB),)
-sun: force
-else
 sun: $(BIN)
-endif
-
 studio7: force
 studio11: force
 studio12: force

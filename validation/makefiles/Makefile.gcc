@@ -11,11 +11,7 @@ CC               = $(COMP_LOC)gcc
 CPP              = $(COMP_LOC)g++
 CFLAGS           = -O0 -g -DYDEBUG -Wno-write-strings
 CFLAGS          += -Wall -Wfatal-errors
-ifeq ($(LANGUAGE),CPP)
 CFLAGS          += -std=c++98
-else
-CFLAGS          += -std=c90
-endif
 CFLAGS          += -pedantic
 CFLAGS          += -Wall -Wextra
 CFLAGS          += -Wformat=2 -Wno-format-extra-args -Wformat-security -Wformat-nonliteral
@@ -42,10 +38,6 @@ LibMath         := -lm
 LDFLAGS         :=
 OMP_CFLAGS       = -fopenmp
 OMP_LDFLAGS      = -fopenmp
-
-GCC_MAJOR       := $(shell gcc -dumpversion | cut -d'.' -f1)
-GCC_MINOR       := $(shell gcc -dumpversion | cut -d'.' -f2)
-GCC_REV         := $(shell gcc -dumpversion | cut -d'.' -f3)
 
 #################################################################
 # Call "make optimized" for optimized compilation
@@ -89,12 +81,7 @@ ifeq ($(arch),sun4u)
     LDFLAGS     += -fPIC
 endif
 
-# Detect if compilation for library
-ifneq ($(LIB),)
-gcc: force
-else
 gcc: $(BIN)
-endif
 prof: gcc
 cov: gcc
 

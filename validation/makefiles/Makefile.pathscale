@@ -46,11 +46,6 @@ ifeq ($(arch),x86_64)
     LDFLAGS     += -fPIC
 endif
 
-# Detect if compilation for library
-ifneq ($(LIB),)
-pathscale: force
-else
 pathscale: $(BIN)
-endif
 
 ############ End of file ########################################
