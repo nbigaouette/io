@@ -445,6 +445,23 @@ void NetCDF_Out::Add_Variable_1D(const std::string name, const int type_index,
 }
 
 // **************************************************************
+void NetCDF_Out::Add_Variable_2D(const std::string name, const int type_index,
+                        const float *const pointer,
+                        const int N, const int M,
+                        const std::string dim_name_N, const std::string dim_name_M,
+                        const std::string units)
+{
+    assert(is_opened);
+
+    assert(N >= 0);
+    assert(M >= 0);
+
+    NetCDF_Dimensions tmp_dims;
+    tmp_dims.Add(dim_name_N, N);
+    tmp_dims.Add(dim_name_M, M);
+    Add_Variable<float>(name, type_index, pointer, tmp_dims, units);
+}
+
 void NetCDF_Out::Add_Variable(const std::string name,
                               const std::string string_to_save)
 {

@@ -158,6 +158,11 @@ public:
                          const T *const pointer, const int N,
                          const std::string dim_name,
                          const std::string units = "");
+    void Add_Variable_2D(const std::string name, const int type_index,
+                         const float *const pointer,
+                         const int N, const int M,
+                         const std::string dim_name_N, const std::string dim_name_M,
+                         const std::string units = "");
     void Add_Variable(const std::string name,
                       const std::string string_to_save);
     void Commit();
