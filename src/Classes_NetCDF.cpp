@@ -159,6 +159,7 @@ void NetCDF_Variable::Commit()
         std_cout << "Commiting variable '" << name.c_str() << "' in file id '" << ncid << "' of type '" << type_index << "' ("<<netcdf_types_string[type_index]<<"), nb of dimension(s) '" << int(dimensions.ids.size()) << "'  (&(dimensions.ids[0]) = " << &(dimensions.ids[0]) << ")\n";
         for (int i = 0 ; i < int(dimensions.ids.size()) ; i++)
         {
+            assert(dimensions.Ns[i] >= 0);
             std_cout << "    Dimension: i=" << i << "  name = " << dimensions.names[i] << "  N = " << dimensions.Ns[i] << "  id = " << (&(dimensions.ids[0]))[i] << "\n";
         }
     }
@@ -435,6 +436,8 @@ void NetCDF_Out::Add_Variable_1D(const std::string name, const int type_index,
                         const std::string units)
 {
     assert(is_opened);
+
+    assert(N >= 0);
 
     NetCDF_Dimensions tmp_dims;
     tmp_dims.Add(dim_name, N);
