@@ -316,7 +316,11 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
         if (Is_Compressed())
         {
 #ifdef COMPRESS_OUTPUT
-            gzFile tmp_file = gzopen(filename.c_str(), "wb");
+            gzFile tmp_file;
+            if (append)
+                tmp_file = gzopen(filename.c_str(), "ab");
+            else
+                tmp_file = gzopen(filename.c_str(), "wb");
             gzbuffer(tmp_file, DEFAULT_BUFFER_SIZE);
             compressed_fh = (void *) tmp_file;
             retry = false;
