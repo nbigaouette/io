@@ -8,7 +8,13 @@
 #include "Classes_NetCDF.hpp"
 #include "InputOutput.hpp"
 
-#define ERR(e) {std_cout << "Error: " << nc_strerror(e) << " ("<<e<<")\n" << std::flush; abort();}
+#define ERR(e, filename)                                                       \
+{                                                                              \
+    std_cout                                                                   \
+        << "Classes_NetCDF.cpp ERROR: '" << nc_strerror(e) << " ("<<e<<")'"    \
+        <<  " working with file '" << filename << "'\n" << std::flush;         \
+    abort();                                                                   \
+}
 
 // Compressiong options
 const int C_shuffle = NC_SHUFFLE;
@@ -35,10 +41,35 @@ namespace Classes_NetCDF
 }
 
 // **************************************************************
-void call_netcdf_and_test(const int netcdf_retval)
+void call_netcdf_and_test_generic(const int &netcdf_retval, const std::string &filename)
 {
     if (netcdf_retval)
-        ERR(netcdf_retval);
+        ERR(netcdf_retval, filename);
+}
+
+// **************************************************************
+void NetCDF_Variable::call_netcdf_and_test(const int netcdf_retval)
+{
+    // Get filename
+    int return_value;
+    char filename[2048];
+    return_value = nc_inq_path(ncid, NULL, filename);
+    if (return_value != NC_NOERR)
+    {
+        call_netcdf_and_test_generic(netcdf_retval, filename);
+    }
+}
+
+// **************************************************************
+void NetCDF_In::call_netcdf_and_test(const int netcdf_retval)
+{
+    call_netcdf_and_test_generic(netcdf_retval, filename);
+}
+
+// **************************************************************
+void NetCDF_Out::call_netcdf_and_test(const int netcdf_retval)
+{
+    call_netcdf_and_test_generic(netcdf_retval, filename);
 }
 
 // **************************************************************
