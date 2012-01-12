@@ -267,7 +267,13 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
     using_C_fh = _using_C_fh;
 
     std::ios_base::openmode file_openmode;
-    if   (full_mode.find("w") != std::string::npos)
+    if (full_mode.find("a") != std::string::npos)
+    {
+        append = true;
+        mode = 'a';
+        file_openmode = std::fstream::out | std::fstream::app;
+    }
+    else if (full_mode.find("w") != std::string::npos)
     {
         mode = 'w';
         file_openmode = std::fstream::out;
@@ -276,12 +282,6 @@ bool IO::Open_File(const std::string full_mode, const bool quiet,
     {
         mode = 'r';
         file_openmode = std::fstream::in;
-    }
-    else if (full_mode.find("a") != std::string::npos)
-    {
-        append = true;
-        mode = 'a';
-        file_openmode = std::fstream::out | std::fstream::app;
     }
     else
     {
