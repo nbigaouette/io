@@ -635,7 +635,6 @@ void NetCDF_In::Open(const std::string _filename)
 
     const int max_nb_try = 5;
     int nb_try = 1;
-    const int netcdf_filetype = NC_NOWRITE;
 
     while (nc_open(filename.c_str(), NC_NOWRITE, &ncid) != NC_NOERR)
     {
