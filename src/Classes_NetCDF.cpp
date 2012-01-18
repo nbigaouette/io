@@ -341,7 +341,7 @@ void NetCDF_Out::Open(const std::string _path, const std::string _filename, cons
     {
         // Sleep 5 seconds before retrying
         std_cout << "WARNING: Could not open file \"" << filename << "\" for writting (" << nb_try << "/" << max_nb_try << "). " << std::flush;
-        if (nb_try > max_nb_try)
+        if (nb_try+1 > max_nb_try)
         {
             std_cout << "Aborting.\n" << std::flush;
             abort();
@@ -641,7 +641,7 @@ void NetCDF_In::Open(const std::string _filename)
     {
         // Sleep 5 seconds before retrying
         std_cout << "WARNING: Could not open file \"" << filename << "\" for reading (" << nb_try << "/" << max_nb_try << "). " << std::flush;
-        if (nb_try > max_nb_try)
+        if (nb_try+1 > max_nb_try)
         {
             std_cout << "Aborting.\n" << std::flush;
             abort();
