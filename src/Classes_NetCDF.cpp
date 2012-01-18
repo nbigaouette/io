@@ -9,10 +9,11 @@
 #include "Classes_NetCDF.hpp"
 #include "InputOutput.hpp"
 
-#define ERR(e, filename)                                                       \
+#define ERR(e, filename, note)                                                 \
 {                                                                              \
     std_cout                                                                   \
         << "Classes_NetCDF.cpp ERROR: '" << nc_strerror(e) << " ("<<e<<")'"    \
+        << (note == "" ? "" : " (" + note + ")")                               \
         <<  " working with file '" << filename << "'\n" << std::flush;         \
     abort();                                                                   \
 }
@@ -26,6 +27,7 @@ const int C_deflate_level = 9;
 const bool verbose = false;
 
 void Wait(const double duration_sec);
+void call_netcdf_and_test_generic(const int &netcdf_retval, const std::string &filename, const std::string note = "");
 
 // *****************************************************************************
 void Wait(const double duration_sec)
@@ -60,14 +62,14 @@ namespace Classes_NetCDF
 }
 
 // **************************************************************
-void call_netcdf_and_test_generic(const int &netcdf_retval, const std::string &filename)
+void call_netcdf_and_test_generic(const int &netcdf_retval, const std::string &filename, const std::string note)
 {
     if (netcdf_retval)
-        ERR(netcdf_retval, filename);
+        ERR(netcdf_retval, filename, note);
 }
 
 // **************************************************************
-void NetCDF_Variable::call_netcdf_and_test(const int netcdf_retval)
+void NetCDF_Variable::call_netcdf_and_test(const int netcdf_retval, const std::string note)
 {
     // Get filename
     int return_value;
@@ -75,20 +77,20 @@ void NetCDF_Variable::call_netcdf_and_test(const int netcdf_retval)
     return_value = nc_inq_path(ncid, NULL, filename);
     if (return_value != NC_NOERR)
     {
-        call_netcdf_and_test_generic(netcdf_retval, filename);
+        call_netcdf_and_test_generic(netcdf_retval, filename, note);
     }
 }
 
 // **************************************************************
-void NetCDF_In::call_netcdf_and_test(const int netcdf_retval)
+void NetCDF_In::call_netcdf_and_test(const int netcdf_retval, const std::string note)
 {
-    call_netcdf_and_test_generic(netcdf_retval, filename);
+    call_netcdf_and_test_generic(netcdf_retval, filename, note);
 }
 
 // **************************************************************
-void NetCDF_Out::call_netcdf_and_test(const int netcdf_retval)
+void NetCDF_Out::call_netcdf_and_test(const int netcdf_retval, const std::string note)
 {
-    call_netcdf_and_test_generic(netcdf_retval, filename);
+    call_netcdf_and_test_generic(netcdf_retval, filename, note);
 }
 
 // **************************************************************
@@ -673,9 +675,9 @@ void NetCDF_In::Read(const std::string variable_name, void * const pointer)
     int varid;
 
     // Get the varid of the data variable, based on its name.
-    call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid) );
+    call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid), "nc_inq_varid(), variable name: " + variable_name);
 
-    call_netcdf_and_test( nc_get_var(ncid, varid, pointer) );
+    call_netcdf_and_test( nc_get_var(ncid, varid, pointer), "nc_get_var(), variable name: " + variable_name );
 }
 
 // **************************************************************
@@ -686,10 +688,10 @@ void NetCDF_In::Read(const std::string variable_name, std::string &content)
     int varid;
 
     // Get the varid of the data variable, based on its name.
-    call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid) );
+    call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid), "nc_inq_varid(), variable name: " + variable_name );
 
     char *content_temp = (char *)calloc(4096, sizeof(char));
-    call_netcdf_and_test( nc_get_var(ncid, varid, (void *) content_temp ) );
+    call_netcdf_and_test( nc_get_var(ncid, varid, (void *) content_temp ), "nc_get_var(), variable name: " + variable_name );
     content = std::string(content_temp);
     free(content_temp);
 }

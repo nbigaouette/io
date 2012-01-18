@@ -102,7 +102,7 @@ private:
     bool is_committed;                      // Before writting, variable must be committed.
     bool is_compressed;
     NetCDF_Dimensions dimensions;
-    void call_netcdf_and_test(const int netcdf_retval);
+    void call_netcdf_and_test(const int netcdf_retval, const std::string note = "");
 
 public:
     int type_index;                         // netcdf_type_*
@@ -136,7 +136,7 @@ private:
     std::map<std::string, int> dimensions_ids;
 
     std::set<uint64_t> previous_variables_ptr;
-    void call_netcdf_and_test(const int netcdf_retval);
+    void call_netcdf_and_test(const int netcdf_retval, const std::string note = "");
 
 public:
 
@@ -179,7 +179,7 @@ private:
     std::string filename;
     int ncid;
     bool is_opened;
-    void call_netcdf_and_test(const int netcdf_retval);
+    void call_netcdf_and_test(const int netcdf_retval, const std::string note = "");
 public:
 
     NetCDF_In();
