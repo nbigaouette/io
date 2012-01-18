@@ -637,7 +637,7 @@ void NetCDF_In::Open(const std::string _filename)
     int nb_try = 1;
     const int netcdf_filetype = NC_NOWRITE;
 
-    while (nc_create(filename.c_str(), netcdf_filetype, &ncid) != NC_NOERR)
+    while (nc_open(filename.c_str(), NC_NOWRITE, &ncid) != NC_NOERR)
     {
         // Sleep 5 seconds before retrying
         std_cout << "WARNING: Could not open file \"" << filename << "\" for reading (" << nb_try << "/" << max_nb_try << "). " << std::flush;
