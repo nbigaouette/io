@@ -26,27 +26,26 @@ const int C_deflate_level = 9;
 // const bool verbose = true;
 const bool verbose = false;
 
-void Wait(const double duration_sec);
 void call_netcdf_and_test_generic(const int &netcdf_retval, const std::string &filename, const std::string note = "");
 
 // *****************************************************************************
-void Wait(const double duration_sec)
-{
-    double delay = 0.0;
-    timeval initial, now;
-    gettimeofday(&initial, NULL);
-    while (delay <= duration_sec)
-    {
-        gettimeofday(&now, NULL);
-        // Transform time into double delay
-        delay = double(now.tv_sec - initial.tv_sec) + 1.0e-6*double(now.tv_usec - initial.tv_usec);
-        //printf("Delay = %.6f   max = %.6f\n", delay, duration_sec);
-    }
-}
-
-
 namespace Classes_NetCDF
 {
+    // *************************************************************************
+    void Wait(const double duration_sec)
+    {
+        double delay = 0.0;
+        timeval initial, now;
+        gettimeofday(&initial, NULL);
+        while (delay <= duration_sec)
+        {
+            gettimeofday(&now, NULL);
+            // Transform time into double delay
+            delay = double(now.tv_sec - initial.tv_sec) + 1.0e-6*double(now.tv_usec - initial.tv_usec);
+            //printf("Delay = %.6f   max = %.6f\n", delay, duration_sec);
+        }
+    }
+
     // **************************************************************
     inline std::string Pause(std::string msg = std::string(""))
     {
@@ -351,7 +350,7 @@ void NetCDF_Out::Open(const std::string _path, const std::string _filename, cons
         {
             std_cout << "Sleeping 5 seconds before re-trying...\n" << std::flush;
             nb_try++;
-            Wait(5.0);
+            Classes_NetCDF::Wait(5.0);
         }
     }
 
@@ -651,7 +650,7 @@ void NetCDF_In::Open(const std::string _filename)
         {
             std_cout << "Sleeping 5 seconds before re-trying...\n" << std::flush;
             nb_try++;
-            Wait(5.0);
+            Classes_NetCDF::Wait(5.0);
         }
     }
 
