@@ -200,7 +200,7 @@ void NetCDF_Variable::Set_Dimension(const NetCDF_Dimensions &user_dims,
 // **************************************************************
 void NetCDF_Variable::Units(const std::string units)
 {
-    call_netcdf_and_test(nc_put_att_text(ncid, varid, "units", units.size(), units.c_str()));
+    call_netcdf_and_test(nc_put_att_text(ncid, varid, "units", units.size(), units.c_str()), "nc_put_att_text(units), variable name: " + name);
 }
 
 // **************************************************************
@@ -230,7 +230,8 @@ void NetCDF_Variable::Commit()
             int(dimensions.ids.size()), // Number of dimension
             &(dimensions.ids[0]),       // Array (contiguous) of dimension ids
             &varid                      // Variable id (function's output)
-        )
+        ),
+        "nc_def_var() (NetCDF_Variable::Commit()), variable name: " + name
     );
 
     if (verbose)
@@ -243,8 +244,8 @@ void NetCDF_Variable::Commit()
         if (dimensions.ids.size() > 1 and dimensions.Ns[0] > 1)
         {
             // Compression can reduce a file size by a factor of 15!
-            //call_netcdf_and_test(nc_def_var_chunking(ncid, varid, 0, &chunks[0]));
-            call_netcdf_and_test(nc_def_var_deflate(ncid, varid, C_shuffle, C_deflate, C_deflate_level));
+            //call_netcdf_and_test(nc_def_var_chunking(ncid, varid, 0, &chunks[0]), "nc_def_var_chunking() (NetCDF_Variable::Commit()), variable name: " + variable_name);
+            call_netcdf_and_test(nc_def_var_deflate(ncid, varid, C_shuffle, C_deflate, C_deflate_level), "nc_def_var_deflate() (NetCDF_Variable::Commit()), variable name: " + name);
         }
     }
 
@@ -257,7 +258,7 @@ void NetCDF_Variable::Write()
     if (not is_committed)
         Commit();
 
-    call_netcdf_and_test(nc_put_var(ncid, varid, pointer));
+    call_netcdf_and_test(nc_put_var(ncid, varid, pointer), "nc_put_var(), variable name: " + name);
 }
 
 // **************************************************************
@@ -358,7 +359,7 @@ void NetCDF_Out::Open(const std::string _path, const std::string _filename, cons
 
     // Disable filling. We will be writting right away, so filling is useless.
     int old_modep;
-    call_netcdf_and_test( nc_set_fill (ncid, NC_NOFILL, &old_modep) );
+    call_netcdf_and_test( nc_set_fill(ncid, NC_NOFILL, &old_modep), "nc_set_fill()");
 
     if (verbose)
         std_cout << "File '" << filename << "' opened for writting with id '" << ncid << "'.\n";
@@ -458,7 +459,8 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
                     dim_name.c_str(),           // Name of dimension
                     dim_N,                      // Number of elements in that dimension
                     &(dimensions_ids[dim_name]) // Dimension commit id pointer
-                )
+                ),
+                "nc_def_dim() (NetCDF_Out::Add_Variable()), dimension name: " + dim_name 
             );
 
             if (verbose)
@@ -547,7 +549,7 @@ void NetCDF_Out::Commit()
     // Not needed for NetCDF4 (?)
     // End define mode. This tells netCDF we are done defining metadata.
     if (not is_committed)
-        call_netcdf_and_test(nc_enddef(ncid));
+        call_netcdf_and_test(nc_enddef(ncid), "nc_enddef() (NetCDF_Out::Commit())");
 
     is_committed = true;
 }
@@ -581,7 +583,7 @@ void NetCDF_Out::Close()
     /* Close the file. This frees up any internal netCDF resources
      * associated with the file, and flushes any buffers. */
     if (is_opened)
-        call_netcdf_and_test(nc_close(ncid));
+        call_netcdf_and_test(nc_close(ncid), "nc_close() (NetCDF_Out::Close())");
 
     is_opened = false;
 }
@@ -699,7 +701,7 @@ void NetCDF_In::Read(const std::string variable_name, std::string &content)
 void NetCDF_In::Close()
 {
     if (is_opened)
-        call_netcdf_and_test(nc_close(ncid));
+        call_netcdf_and_test(nc_close(ncid), "nc_close() (NetCDF_In::Close())");
     is_opened = false;
 }
 
