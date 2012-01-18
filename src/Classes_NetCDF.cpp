@@ -2,6 +2,7 @@
 #ifdef NETCDF
 
 #include <stdint.h> // (u)int64_t
+#include <sys/time.h> // timeval
 
 #include <StdCout.hpp>
 
@@ -23,6 +24,24 @@ const int C_deflate_level = 9;
 
 // const bool verbose = true;
 const bool verbose = false;
+
+void Wait(const double duration_sec);
+
+// *****************************************************************************
+void Wait(const double duration_sec)
+{
+    double delay = 0.0;
+    timeval initial, now;
+    gettimeofday(&initial, NULL);
+    while (delay <= duration_sec)
+    {
+        gettimeofday(&now, NULL);
+        // Transform time into double delay
+        delay = double(now.tv_sec - initial.tv_sec) + 1.0e-6*double(now.tv_usec - initial.tv_usec);
+        //printf("Delay = %.6f   max = %.6f\n", delay, duration_sec);
+    }
+}
+
 
 namespace Classes_NetCDF
 {
@@ -312,13 +331,25 @@ void NetCDF_Out::Open(const std::string _path, const std::string _filename, cons
     Create_Folder_If_Does_Not_Exists(_path);
 
     // Open file
-    if (is_netcdf4)
+    const int max_nb_try = 5;
+    int nb_try = 1;
+    const int netcdf_filetype = (is_netcdf4 ? NC_NETCDF4 : NC_CLOBBER);
+
+    while (nc_create(filename.c_str(), netcdf_filetype, &ncid) != NC_NOERR)
     {
-        call_netcdf_and_test(nc_create(filename.c_str(), NC_NETCDF4, &ncid));
-    }
-    else
-    {
-        call_netcdf_and_test(nc_create(filename.c_str(), NC_CLOBBER, &ncid));
+        // Sleep 5 seconds before retrying
+        std_cout << "WARNING: Could not open file \"" << filename << "\" for writting (" << nb_try << "/" << max_nb_try << "). " << std::flush;
+        if (nb_try > max_nb_try)
+        {
+            std_cout << "Aborting.\n" << std::flush;
+            abort();
+        }
+        else
+        {
+            std_cout << "Sleeping 5 seconds before re-trying...\n" << std::flush;
+            nb_try++;
+            Wait(5.0);
+        }
     }
 
     is_opened    = true;
@@ -328,7 +359,7 @@ void NetCDF_Out::Open(const std::string _path, const std::string _filename, cons
     call_netcdf_and_test( nc_set_fill (ncid, NC_NOFILL, &old_modep) );
 
     if (verbose)
-        std_cout << "File '" << filename << "' opened with id '" << ncid << "'.\n";
+        std_cout << "File '" << filename << "' opened for writting with id '" << ncid << "'.\n";
 }
 
 // **************************************************************
@@ -600,9 +631,31 @@ void NetCDF_In::Open(const std::string _filename)
 
     filename = _filename;
 
-    call_netcdf_and_test( nc_open(filename.c_str(), NC_NOWRITE, &ncid) );
+    const int max_nb_try = 5;
+    int nb_try = 1;
+    const int netcdf_filetype = NC_NOWRITE;
+
+    while (nc_create(filename.c_str(), netcdf_filetype, &ncid) != NC_NOERR)
+    {
+        // Sleep 5 seconds before retrying
+        std_cout << "WARNING: Could not open file \"" << filename << "\" for reading (" << nb_try << "/" << max_nb_try << "). " << std::flush;
+        if (nb_try > max_nb_try)
+        {
+            std_cout << "Aborting.\n" << std::flush;
+            abort();
+        }
+        else
+        {
+            std_cout << "Sleeping 5 seconds before re-trying...\n" << std::flush;
+            nb_try++;
+            Wait(5.0);
+        }
+    }
 
     is_opened = true;
+
+    if (verbose)
+        std_cout << "File '" << filename << "' opened for reading with id '" << ncid << "'.\n";
 }
 
 // **************************************************************
