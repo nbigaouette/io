@@ -3,19 +3,38 @@
 
 #include <stdint.h> // (u)int64_t
 #include <sys/time.h> // timeval
+#include <exception>
 
 #include <StdCout.hpp>
 
 #include "Classes_NetCDF.hpp"
 #include "InputOutput.hpp"
 
+template <class Integer>
+inline std::string IntToStr(const Integer integer, const int width = 0, const char fill = ' ')
+{
+    std::ostringstream MyStream;
+    if (width != 0)
+    {
+        MyStream << std::setw(width);
+        MyStream << std::setfill(fill);
+    }
+    MyStream << integer << std::flush;
+    return (MyStream.str());
+}
+
 #define ERR(e, filename, note)                                                 \
 {                                                                              \
-    std_cout                                                                   \
-        << "Classes_NetCDF.cpp ERROR: '" << nc_strerror(e) << " ("<<e<<")'"    \
-        << (note == "" ? "" : " (" + note + ")")                               \
-        <<  " working with file '" << filename << "'\n" << std::flush;         \
-    abort();                                                                   \
+    std::string error_msg =                                                    \
+          std::string("Classes_NetCDF.cpp ERROR: '")                           \
+        + std::string(nc_strerror(e))                                          \
+        + std::string(" (") + IntToStr(e) + std::string(")'");                 \
+    if (note != "")                                                            \
+        error_msg = error_msg + " (" + note + ")";                             \
+    error_msg = error_msg + " working with file '" + filename + "'";           \
+    std_cout << error_msg << "\n";                                             \
+    std_cout.Flush();                                                          \
+    throw std::ios_base::failure(error_msg);                                   \
 }
 
 // Compressiong options
