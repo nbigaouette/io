@@ -229,8 +229,10 @@ void NetCDF_Variable::Commit()
         std_cout << "Commiting variable '" << name.c_str() << "' in file id '" << ncid << "' of type '" << type_index << "' ("<<netcdf_types_string[type_index]<<"), nb of dimension(s) '" << int(dimensions.ids.size()) << "'  (&(dimensions.ids[0]) = " << &(dimensions.ids[0]) << ")\n";
         for (int i = 0 ; i < int(dimensions.ids.size()) ; i++)
         {
-            assert(dimensions.Ns[i] >= 0);
-            std_cout << "    Dimension: i=" << i << "  name = " << dimensions.names[i] << "  N = " << dimensions.Ns[i] << "  id = " << (&(dimensions.ids[0]))[i] << "\n";
+            std_cout << "    Dimension: i=" << i << "  name = " << dimensions.names[i] << "  N = ";
+            if (dimensions.Ns[i] < 0) std_cout << "UNLIMITED (" << -dimensions.Ns[i] << ")";
+            else                      std_cout << dimensions.Ns[i];
+            std_cout << "  id = " << (&(dimensions.ids[0]))[i] << "\n";
         }
     }
 
@@ -276,7 +278,26 @@ void NetCDF_Variable::Write()
     if (not is_committed)
         Commit();
 
-    call_netcdf_and_test(nc_put_var(ncid, varid, pointer), "nc_put_var(), variable name: " + name);
+    if (netcdf_type == NC_CHAR)
+    {
+        assert(dimensions.Ns.size() == 1);
+        assert(dimensions.Ns[0] < 0);
+
+        // Save array of characters (a string) one character at a time...
+        for (int i = 0 ; i < -dimensions.Ns[0] ; i++)
+        {
+            const char character_to_save = ((char *)pointer)[i];
+            size_t start = i;
+            size_t count = 1;
+            call_netcdf_and_test(
+                nc_put_vara(ncid, varid, &start, &count, ((char *)pointer) + i),
+                "nc_put_vara(), variable name: " + name);
+        }
+    }
+    else
+    {
+        call_netcdf_and_test(nc_put_var(ncid, varid, pointer), "nc_put_var(), variable name: " + name);
+    }
 }
 
 // **************************************************************
@@ -451,7 +472,14 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
     for (size_t i = 0 ; i < dims.size() ; i++)
     {
         if (verbose)
-            std_cout << "    NetCDF_Out::Add_Variable() 0. dimension: name="<<dims.names[i]<<"  N="<<dims.Ns[i]<<"\n";
+        {
+            std_cout << "    NetCDF_Out::Add_Variable() 0. dimension: name="<<dims.names[i]<<"  N=";
+            if (dims.Ns[i] < 0) std_cout << "UNLIMITED (" << -dims.Ns[i] << ")";
+            else                std_cout << dims.Ns[i];
+            std_cout <<"\n";
+        }
+
+        assert(dims.Ns[i] != 0 and dims.Ns[i] != NC_UNLIMITED);
 
         // Search for already saved/commited dimensions
         const std::map<std::string, int>::iterator it_search = dimensions_val.find(dims.names[i]);
@@ -460,15 +488,26 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
         if (it_search == dimensions_val.end())
         {
             // Store temporary references
-            const std::string &dim_name = dims.names[i];
-            const int &dim_N            = dims.Ns[i];
+            const std::string dim_name  = dims.names[i];
+            const int dim_N             = (dims.Ns[i] < 0 ? NC_UNLIMITED : dims.Ns[i]);
 
             if (verbose)
-                std_cout << "    NetCDF_Out::Add_Variable() 1. dimension: name="<<dim_name<<"  N="<<dim_N<<" not found! Adding...\n";
+            {
+                std_cout << "    NetCDF_Out::Add_Variable() 1. dimension: name="<<dim_name<<"  N=";
+                if (dim_N == NC_UNLIMITED)  std_cout << "UNLIMITED (" << -dims.Ns[i] << ")";
+                else                        std_cout << dim_N;
+                std_cout <<" not found! Adding...\n";
+            }
 
             // Set the stored values
             dimensions_val[dim_name] = dim_N;
             dimensions_ids[dim_name] = -1; // Default value, will be changed next
+
+            if (type_index == netcdf_type_char)
+            {
+                assert(dims.Ns[i] < 0);
+                assert(dim_N == NC_UNLIMITED);
+            }
 
             // Commit this dimension (set dimensions_ids[dim_name])
             call_netcdf_and_test(
@@ -521,8 +560,6 @@ void NetCDF_Out::Add_Variable_1D(const std::string name, const int type_index,
 {
     assert(is_opened);
 
-    assert(N >= 0);
-
     NetCDF_Dimensions tmp_dims;
     tmp_dims.Add(dim_name, N);
     Add_Variable<T>(name, type_index, pointer, tmp_dims, units);
@@ -554,9 +591,7 @@ void NetCDF_Out::Add_Variable(const std::string name,
 
     const int N = int(string_to_save.size());
 
-    std::ostringstream string_length;
-    string_length << "string" << N;
-    Add_Variable_1D<char>(name, netcdf_type_char, string_to_save.c_str(), N, string_length.str());
+    Add_Variable_1D<char>(name, netcdf_type_char, string_to_save.c_str(), -N, "len_" + name);
 }
 
 // **************************************************************
