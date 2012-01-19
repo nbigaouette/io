@@ -546,6 +546,7 @@ void NetCDF_Out::Add_Variable_2D(const std::string name, const int type_index,
     Add_Variable<float>(name, type_index, pointer, tmp_dims, units);
 }
 
+// **************************************************************
 void NetCDF_Out::Add_Variable(const std::string name,
                               const std::string string_to_save)
 {
