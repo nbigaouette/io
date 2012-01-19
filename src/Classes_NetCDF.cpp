@@ -433,7 +433,7 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
     if (type_index == netcdf_type_fdouble)
     {
         // Set the right type_index
-        if (sizeof(T) == sizeof(float))
+        if      (sizeof(T) == sizeof(float))
             variables[name].type_index = netcdf_type_float;
         else if (sizeof(T) == sizeof(double))
             variables[name].type_index = netcdf_type_double;
