@@ -516,7 +516,7 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
                     dim_N,                      // Number of elements in that dimension
                     &(dimensions_ids[dim_name]) // Dimension commit id pointer
                 ),
-                "nc_def_dim() (NetCDF_Out::Add_Variable()), dimension name: " + dim_name 
+                "nc_def_dim() (NetCDF_Out::Add_Variable()), dimension name: " + dim_name
             );
 
             if (verbose)
