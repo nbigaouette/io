@@ -286,7 +286,6 @@ void NetCDF_Variable::Write()
         // Save array of characters (a string) one character at a time...
         for (int i = 0 ; i < -dimensions.Ns[0] ; i++)
         {
-            const char character_to_save = ((char *)pointer)[i];
             size_t start = i;
             size_t count = 1;
             call_netcdf_and_test(
