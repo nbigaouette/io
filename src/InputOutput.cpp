@@ -1136,6 +1136,30 @@ bool ReadXML::Is_Enable(const std::string element)
 }
 
 // **************************************************************
+double ReadXML::Factor_Unit_To_J(const std::string element)
+{
+    const std::string unit = Get_Unit(element);
+    double unit_factor = 0.0;
+
+
+    if      (unit == "J")       unit_factor = 1.0;
+    else if (unit == "eV")      unit_factor = libtinyxml::eV_to_J;
+    else if (unit == "Hartree") unit_factor = libtinyxml::Eh_to_J;
+    else if (unit == "Eh")      unit_factor = libtinyxml::Eh_to_J;
+    else
+    {
+        std_cout
+            << "Error in reading XML input file:\n"
+            << "Unit of " << element << " needs to be either:\n"
+            << "    J\n    eV\n    Hartree\n"
+            << "Aborting\n" << std::flush;
+        abort();
+    }
+
+    return unit_factor;
+}
+
+// **************************************************************
 double ReadXML::Factor_Unit_To_Metre(const std::string element)
 {
     const std::string unit = Get_Unit(element);

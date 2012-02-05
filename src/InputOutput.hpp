@@ -171,6 +171,7 @@ class ReadXML
 
         int         Count_Elements(TiXmlNode *root, const std::string &element);
 
+        double      Factor_Unit_To_J(           const std::string element);
         double      Factor_Unit_To_Metre(       const std::string element);
         double      Factor_Unit_To_Second(      const std::string element);
         double      Factor_Unit_To_Length_AU(   const std::string element);
