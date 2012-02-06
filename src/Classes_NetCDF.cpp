@@ -741,23 +741,28 @@ void NetCDF_In::Read(const std::string variable_name, void * const pointer)
     std::vector<std::string> possible_variable_names = Split(variable_name, ';');
 
     int varid;
+    int return_value;
     bool read_successful = false;
 
     while (possible_variable_names.size() > 0)
     {
-        try
+        return_value = nc_inq_varid(ncid, possible_variable_names.back().c_str(), &varid);
+        // Reading fail, try next possible variable name.
+        if (return_value != NC_NOERR)
         {
-            // Get the varid of the data variable, based on its name.
-            call_netcdf_and_test( nc_inq_varid(ncid, possible_variable_names.back().c_str(), &varid), "nc_inq_varid(), variable name: " + possible_variable_names.back());
-            call_netcdf_and_test( nc_get_var(ncid, varid, pointer), "nc_get_var(), variable name: " + possible_variable_names.back() );
-            read_successful = true;
-        }
-        catch (std::ios_base::failure e)
-        {
-            std_cout << "Classes_NetCDF.cpp Warning: Variable name \"" << possible_variable_names.back() << "\" not found in file. Trying next value..." << std::endl;
             possible_variable_names.pop_back();
             continue;
         }
+
+        return_value = nc_get_var(ncid, varid, pointer);
+        // Reading fail, try next possible variable name.
+        if (return_value != NC_NOERR)
+        {
+            possible_variable_names.pop_back();
+            continue;
+        }
+
+        read_successful = true;
         break;
     }
 
