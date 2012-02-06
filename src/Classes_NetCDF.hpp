@@ -132,7 +132,7 @@ private:
     bool is_opened;
     bool is_committed;
     bool is_written;
-    std::map<std::string, int> dimensions_val;
+    std::map<std::string, size_t> dimensions_val;
     std::map<std::string, int> dimensions_ids;
 
     std::set<uint64_t> previous_variables_ptr;

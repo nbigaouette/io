@@ -480,14 +480,14 @@ void NetCDF_Out::Add_Variable(const std::string name, const int type_index,
         assert(dims.Ns[i] != 0 and dims.Ns[i] != NC_UNLIMITED);
 
         // Search for already saved/commited dimensions
-        const std::map<std::string, int>::iterator it_search = dimensions_val.find(dims.names[i]);
+        const std::map<std::string, size_t>::iterator it_search = dimensions_val.find(dims.names[i]);
 
         // If not found any, create the new dimension
         if (it_search == dimensions_val.end())
         {
             // Store temporary references
             const std::string dim_name  = dims.names[i];
-            const int dim_N             = (dims.Ns[i] < 0 ? NC_UNLIMITED : dims.Ns[i]);
+            const size_t dim_N          = (dims.Ns[i] < 0 ? NC_UNLIMITED : dims.Ns[i]);
 
             if (verbose)
             {
@@ -656,7 +656,7 @@ void NetCDF_Out::Print() const
         it->second.Print();
     }
     std_cout << "    dimensions_val:\n";
-    for (std::map<std::string, int>::const_iterator it = dimensions_val.begin() ; it != dimensions_val.end() ; it++ )
+    for (std::map<std::string, size_t>::const_iterator it = dimensions_val.begin() ; it != dimensions_val.end() ; it++ )
     {
         std_cout
             << "        (name,N,id) = ("
