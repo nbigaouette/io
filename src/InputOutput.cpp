@@ -707,6 +707,15 @@ TiXmlNode * ReadXML::Get_SubNode(const std::string elements, TiXmlNode *subnode)
         TiXmlNode *subsubnode = NULL;
         do {
             subsubnode = subnode->IterateChildren(subsubnode);
+            if (subsubnode == NULL)
+            {
+                std_cout << "ERROR: ReadXML::Get_SubNode() failed!\n"
+                         << "Element \"" << elements << "\" not found!\n";
+                std_cout.Flush();
+                std_cout << "First element not found: \"" << subnode->Value() << "\"\n";
+                std_cout.Flush();
+                abort();
+            }
         } while (subsubnode->Value() != *it);
 
         subnode = subsubnode;
