@@ -4,6 +4,7 @@
 #include <stdint.h> // (u)int64_t
 #include <sys/time.h> // timeval
 #include <exception>
+#include <list>
 
 #include <StdCout.hpp>
 
@@ -719,16 +720,46 @@ NetCDF_In::~NetCDF_In()
 }
 
 // **************************************************************
-std::vector<std::string> Split(const std::string &s, const char delim)
+std::vector<std::string> Split(const std::string &s, const std::string delimiters = ";, ")
 {
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim))
+    // Initialize a list of a single element which contains the string to split
+    std::list<std::string> elements(1,s);
+
+    // Loop over all delimiters
+    for (size_t i = 0 ; i < delimiters.size() ; i++)
     {
-        elems.push_back(item);
+        // Store a temporary object. Necessary since the actual list will change when we split it.
+        std::list<std::string> tmp_elements = elements;
+
+        // Iterate over the list of strings and split each of them
+        for (std::list<std::string>::iterator it = elements.begin() ; it != elements.end() ; it++)
+        {
+            // Store the string to split
+            std::stringstream ss(*it);
+            std::string item;
+
+            // Remove the string from the temporary list
+            tmp_elements.remove(*it);
+
+            // Split the string into substrings and add them to the temporary list
+            while (std::getline(ss, item, delimiters[i]))
+            {
+                tmp_elements.push_back(item);
+            }
+        }
+
+        // Restore the list
+        elements = tmp_elements;
     }
-    return elems;
+
+    // We wanted a vector to simplify looping outside the function.
+    std::vector<std::string> substrings;
+    for (std::list<std::string>::iterator it = elements.begin() ; it != elements.end() ; it++)
+    {
+        substrings.push_back(*it);
+    }
+
+    return substrings;
 }
 
 // **************************************************************
@@ -738,7 +769,7 @@ void NetCDF_In::Read(const std::string variable_name, void * const pointer)
     assert(pointer != NULL);
 
     // Split variable name
-    std::vector<std::string> possible_variable_names = Split(variable_name, ';');
+    std::vector<std::string> possible_variable_names = Split(variable_name);
 
     int varid;
     int return_value;
