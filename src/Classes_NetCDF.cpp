@@ -719,12 +719,9 @@ NetCDF_In::~NetCDF_In()
 }
 
 // **************************************************************
-std::vector<std::string> & Split(const std::string &s, const char delim, std::vector<std::string> &elems)
-/**
- * A fucntion to split a string by a delimiter, returning the result by a passed vector
- * source: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c/236803#236803
- */
+std::vector<std::string> Split(const std::string &s, const char delim)
 {
+    std::vector<std::string> elems;
     std::stringstream ss(s);
     std::string item;
     while (std::getline(ss, item, delim))
@@ -732,13 +729,6 @@ std::vector<std::string> & Split(const std::string &s, const char delim, std::ve
         elems.push_back(item);
     }
     return elems;
-}
-
-// **************************************************************
-std::vector<std::string> Split(const std::string &s, const char delim)
-{
-    std::vector<std::string> elems;
-    return Split(s, delim, elems);
 }
 
 // **************************************************************
