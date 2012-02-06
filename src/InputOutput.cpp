@@ -699,7 +699,7 @@ TiXmlNode * ReadXML::Get_SubNode(const std::string elements, TiXmlNode *subnode)
         if (subnode == NULL)
         {
             std_cout
-                << "XML_Get_SubNode() failed!\n"
+                << "ERROR: ReadXML::Get_SubNode() failed!\n"
                 << "Element \"" << elements << "\" not found!\n" << std::flush;
                 abort();
         }
