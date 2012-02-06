@@ -719,17 +719,66 @@ NetCDF_In::~NetCDF_In()
 }
 
 // **************************************************************
+std::vector<std::string> & Split(const std::string &s, const char delim, std::vector<std::string> &elems)
+/**
+ * A fucntion to split a string by a delimiter, returning the result by a passed vector
+ * source: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c/236803#236803
+ */
+{
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim))
+    {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+// **************************************************************
+std::vector<std::string> Split(const std::string &s, const char delim)
+{
+    std::vector<std::string> elems;
+    return Split(s, delim, elems);
+}
+
+// **************************************************************
 void NetCDF_In::Read(const std::string variable_name, void * const pointer)
 {
     assert(is_opened);
     assert(pointer != NULL);
 
+    // Split variable name
+    std::vector<std::string> possible_variable_names = Split(variable_name, ';');
+
     int varid;
+    bool read_successful = false;
 
-    // Get the varid of the data variable, based on its name.
-    call_netcdf_and_test( nc_inq_varid(ncid, variable_name.c_str(), &varid), "nc_inq_varid(), variable name: " + variable_name);
+    while (possible_variable_names.size() > 0)
+    {
+        try
+        {
+            // Get the varid of the data variable, based on its name.
+            call_netcdf_and_test( nc_inq_varid(ncid, possible_variable_names.back().c_str(), &varid), "nc_inq_varid(), variable name: " + possible_variable_names.back());
+            call_netcdf_and_test( nc_get_var(ncid, varid, pointer), "nc_get_var(), variable name: " + possible_variable_names.back() );
+            read_successful = true;
+        }
+        catch (std::ios_base::failure e)
+        {
+            std_cout << "Classes_NetCDF.cpp Warning: Variable name \"" << possible_variable_names.back() << "\" not found in file. Trying next value..." << std::endl;
+            possible_variable_names.pop_back();
+            continue;
+        }
+        break;
+    }
 
-    call_netcdf_and_test( nc_get_var(ncid, varid, pointer), "nc_get_var(), variable name: " + variable_name );
+    if (not read_successful)
+    {
+        std_cout
+            << "Classes_NetCDF.cpp ERROR: Could not find any variable names from these possibilities: " << variable_name << "\n"
+            << "Aborting.\n";
+        std_cout.Flush();
+        abort();
+    }
 }
 
 // **************************************************************
