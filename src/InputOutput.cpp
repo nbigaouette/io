@@ -6,6 +6,7 @@
 #include <limits>   // std::numeric_limits<>::max()
 #include <climits> // CHAR_BIT
 #include <sys/stat.h> // Check if folder exists
+#include <algorithm> // tolower
 
 
 #include <StdCout.hpp>
@@ -1147,14 +1148,14 @@ bool ReadXML::Is_Enable(const std::string element)
 // **************************************************************
 double ReadXML::Factor_Unit_To_J(const std::string element)
 {
-    const std::string unit = Get_Unit(element);
     double unit_factor = 0.0;
+    std::string unit = Get_Unit(element);
+    std::transform(unit.begin(), unit.end(), unit.begin(), ::tolower);
 
-
-    if      (unit == "J")       unit_factor = 1.0;
-    else if (unit == "eV")      unit_factor = libtinyxml::eV_to_J;
-    else if (unit == "Hartree") unit_factor = libtinyxml::Eh_to_J;
-    else if (unit == "Eh")      unit_factor = libtinyxml::Eh_to_J;
+    if      (unit == "j")       unit_factor = 1.0;
+    else if (unit == "ev")      unit_factor = libtinyxml::eV_to_J;
+    else if (unit == "hartree") unit_factor = libtinyxml::Eh_to_J;
+    else if (unit == "eh")      unit_factor = libtinyxml::Eh_to_J;
     else
     {
         std_cout
@@ -1171,8 +1172,9 @@ double ReadXML::Factor_Unit_To_J(const std::string element)
 // **************************************************************
 double ReadXML::Factor_Unit_To_Metre(const std::string element)
 {
-    const std::string unit = Get_Unit(element);
     double unit_factor = 0.0;
+    std::string unit = Get_Unit(element);
+    std::transform(unit.begin(), unit.end(), unit.begin(), ::tolower);
 
     if      (unit == "au")      unit_factor = libtinyxml::bohr_to_m;
     else if (unit == "bohr")    unit_factor = libtinyxml::bohr_to_m;
@@ -1198,8 +1200,9 @@ double ReadXML::Factor_Unit_To_Metre(const std::string element)
 // **************************************************************
 double ReadXML::Factor_Unit_To_Second(const std::string element)
 {
-    const std::string unit = Get_Unit(element);
     double unit_factor = 0.0;
+    std::string unit = Get_Unit(element);
+    std::transform(unit.begin(), unit.end(), unit.begin(), ::tolower);
 
     if      (unit == "au")  unit_factor = libtinyxml::au_to_si_time;
     else if (unit == "zs")  unit_factor = libtinyxml::zs_to_s;
@@ -1238,13 +1241,14 @@ double ReadXML::Factor_Unit_To_Time_AU(const std::string element)
 // **************************************************************
 double ReadXML::Factor_Unit_To_Intensity_AU(const std::string element)
 {
-    const std::string unit = Get_Unit(element);
     double unit_factor = 0.0;
+    std::string unit = Get_Unit(element);
+    std::transform(unit.begin(), unit.end(), unit.begin(), ::tolower);
 
-    if      (unit == "W/cm^2")  unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
-    else if (unit == "W.cm-^2") unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
-    else if (unit == "W/m^2")   unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(                    libtinyxml::m_to_bohr, 2)));
-    else if (unit == "W.m-^2")  unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(                    libtinyxml::m_to_bohr, 2)));
+    if      (unit == "w/cm^2")  unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
+    else if (unit == "w.cm-^2") unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
+    else if (unit == "w/m^2")   unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(                    libtinyxml::m_to_bohr, 2)));
+    else if (unit == "w.m-^2")  unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(                    libtinyxml::m_to_bohr, 2)));
     else
     {
         std_cout
