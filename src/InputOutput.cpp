@@ -1098,6 +1098,16 @@ void ReadXML::Set_String(const std::string element, const std::string value)
 }
 
 // **************************************************************
+void ReadXML::Set_Attribute_String(const std::string element, const std::string attribute,
+                                   const std::string value)
+{
+    // Get the subnode
+    TiXmlNode *subnode = Get_SubNode(element);
+
+    subnode->ToElement()->SetAttribute(attribute.c_str(), value.c_str());
+}
+
+// **************************************************************
 int ReadXML::Count_Elements(TiXmlNode *root, const std::string &element)
 {
     int count = 0;
