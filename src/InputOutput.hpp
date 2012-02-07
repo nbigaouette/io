@@ -156,6 +156,18 @@ class ReadXML
             Set_String(element, value_string);
         }
 
+        template <class T>
+        void        Set_Attribute(const std::string element, const std::string attribute, const T value)
+        {
+            // Get a string representation of the value
+            std::stringstream string_stream;
+            string_stream << value;
+            // Set the value of the node to be the used seed
+            const std::string value_string = string_stream.str();
+
+            Set_Attribute_String(element, attribute, value_string);
+        }
+
         // Get attributes
         std::string Get_Attribute_String(   const std::string element, const std::string attribute, TiXmlNode *subnode = NULL);
         bool        Get_Attribute_Bool(     const std::string element, const std::string attribute, TiXmlNode *subnode = NULL);
