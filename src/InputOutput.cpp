@@ -339,6 +339,7 @@ std_cout << "File handle is: " << C_fh << " for name " << filename.c_str() << " 
                 {
                     std::cerr << "\nCould not open file \"" << filename << "\" for '" << full_mode << "'...\n";
                     std::string answer = Pause("Retry? [y/N]");
+                    std::transform(answer.begin(), answer.end(), answer.begin(), ::tolower);
                     if (! (answer == "y" || answer == "yes"))
                     {
                         std_cout << std::flush;
@@ -359,6 +360,7 @@ std_cout << "File handle is: " << C_fh << " for name " << filename.c_str() << " 
                 {
                     std::cerr << "Could not open file \"" << filename << "\" for '" << full_mode << "'...\n";
                     std::string answer = Pause("Retry? [y/N]");
+                    std::transform(answer.begin(), answer.end(), answer.begin(), ::tolower);
                     if (! (answer == "y" || answer == "yes"))
                     {
                         std_cout << std::flush;
