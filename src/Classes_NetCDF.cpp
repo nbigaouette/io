@@ -799,11 +799,10 @@ void NetCDF_In::Read(const std::string variable_name, void * const pointer)
 
     if (not read_successful)
     {
-        std_cout
-            << "Classes_NetCDF.cpp ERROR: Could not find any variable names from these possibilities: " << variable_name << "\n"
-            << "Aborting.\n";
+        const std::string msg("Classes_NetCDF.cpp ERROR: Could not find any variable names from these possibilities: " + variable_name);
+        std_cout << msg << "\n" << "Aborting.\n";
         std_cout.Flush();
-        abort();
+        throw std::ios_base::failure(msg);
     }
 }
 
