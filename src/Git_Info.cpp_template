@@ -6,7 +6,7 @@
         return tmp;
     }
 
-    void Log_Git_Info(std::string basename = "")
+    void Log_Git_Info(std::string basename)
     {
         std::string git_version("##############################################################\n");
         git_version +=          "# Git information:                                           #\n";
