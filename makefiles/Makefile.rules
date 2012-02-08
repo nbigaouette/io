@@ -27,8 +27,14 @@ space:= $(empty) $(empty)
 
 build_dir        = build
 
+HEADERS          = $(wildcard $(addsuffix *.$(HEADEXT),$(addsuffix /, $(SRCDIRS)) ) )
+
 HPCVL_MACHINES   = sflogin xenakis
 SHARCNET_MACHINES= bul narwhal wha hnd bal
+
+GCC_MAJOR       := $(shell gcc -dumpversion | cut -d'.' -f1)
+GCC_MINOR       := $(shell gcc -dumpversion | cut -d'.' -f2)
+GCC_REV         := $(shell gcc -dumpversion | cut -d'.' -f3)
 
 #################################################################
 # Force printing of help if just "make" is called
@@ -45,7 +51,7 @@ ifneq ($(filter gcc, $(MAKECMDGOALS) ),)
     include makefiles/Makefile.gcc
 endif
 #################################################################
-# Call "make gcc" for building using LLVM's Clang (clang or clang++)
+# Call "make clang" for building using LLVM's Clang (clang or clang++)
 ifneq ($(filter clang, $(MAKECMDGOALS) ),)
     include makefiles/Makefile.clang
 endif
@@ -96,6 +102,18 @@ ifneq ($(filter omp, $(MAKECMDGOALS) ),)
     LDFLAGS     += $(OMP_LDFLAGS)
 endif
 #################################################################
+# Call "make ocl" for OpenCL compilation
+ifneq ($(filter ocl, $(MAKECMDGOALS) ),)
+    USE_OPENCL       = "yes"
+    CFLAGS          += -DGPGPU_OPENCL
+    ifeq ($(os), Darwin)
+        #CFLAGS      += -I"/Developer/GPU Computing/OpenCL/common/inc"
+        LDFLAGS     += -framework OpenCL
+    else
+        LDFLAGS     += -lOpenCL
+    endif
+endif
+#################################################################
 
 COMPILER    := $(CC)
 ifeq ($(LANGUAGE),CPP)
@@ -103,8 +121,6 @@ COMPILER    := $(CPP)
 endif
 LD          := $(COMPILER)
 
-VPATH            = $(subst $(space),$(column),$(SRCDIRS) )
-# SOURCES            = $(sort $(subst src/,,$(foreach DIR,$(SRCDIRS) .,$(wildcard $(DIR)/*.$(SRCEXT) ) ) ) )
 SOURCES          = $(subst $(SRCDIRS)/,,$(foreach DIR,$(SRCDIRS) .,$(wildcard $(DIR)/*.$(SRCEXT) ) ) )
 NAMES            = $(subst .$(SRCEXT),,$(SOURCES) )
 BASENAMES        = $(notdir $(NAMES) )
@@ -112,6 +128,10 @@ OBJ              = $(addprefix $(build_dir)/,$(addsuffix .o, $(BASENAMES) ) )
 
 INCLUDES         = $(addprefix -I./, $(SRCDIRS) )
 LDFLAGS         += -L./$(build_dir)
+
+ifeq ($(os), Darwin)
+CFLAGS          += -DMACOSX
+endif
 
 #################################################################
 # This is a "template", acting like a function.
@@ -174,9 +194,29 @@ define LDFLAGS_template
             endif
         endif
     endif
-    LDFLAGS     += -L$$($(1)_LibDir) -l$(1)
-    ifneq ($(RPATH),)
-        LDFLAGS += $(RPATH)$$($(1)_LibDir)
+
+    ifeq ($(LIB),)
+        ifeq ($$(os),Darwin)
+            MyLibs += $$($(1)_LibDir)/lib$(1).a
+            MyLibs += -framework $(1)
+            MyLibs_Path += -F$$($(1)_LibDir) $(RPATH)$$($(1)_LibDir)
+        else
+            ifeq ($(LINK_PREFERED),static)
+	        MyLibs += $$($(1)_LibDir)/lib$(1).a
+            else  # ifeq ($(LINK_PREFERED),static)
+                ifeq ($(LINK_PREFERED),shared)
+                    MyLibs += -L$$($(1)_LibDir) $(RPATH)$$($(1)_LibDir) -l$(1)
+                else  # ifeq ($(LINK_PREFERED),shared)
+                    $$(error Please define LINK_PREFERED=static or LINK_PREFERED=shared in main Makefile, before the "include makefiles/Makefile.rules" directive.)
+                endif # ifeq ($(LINK_PREFERED),shared)
+            endif # ifeq ($(LINK_PREFERED),static)
+        endif
+    else
+        ifeq ($$(os),Darwin)
+            MyLibs += $$($(1)_LibDir)/lib$(1).a
+        else
+	    MyLibs += $$($(1)_LibDir)/lib$(1).a
+        endif
     endif
 endef
 
@@ -190,29 +230,53 @@ $(eval $(call CFLAGS_template,$(1),$(2),$(3)))
 $(eval $(call LDFLAGS_template,$(1),$(2),$(3)))
 endef
 
+ifneq ($(LD_LIBRARY_PATH),)
+ifeq ($(LINK_PREFERED),shared)
+# Make sure the resulting binary will know the exact path of the shared libraries.
+LD_LIBRARY_PATHs = $(subst :, ,$(LD_LIBRARY_PATH) )
+ifneq ($(RPATH),)
+LDFLAGS += $(strip $(sort $(addprefix $(RPATH), $(LD_LIBRARY_PATHs))))
+endif
+endif
+endif
 
 #################################################################
 # Tools
+SOFTLIMIT        = softlimit -a 500000000
 RM               = rm -f
 CONSOLE          = xterm -hold -e
 #CONSOLE          = konsole --vt_sz 73x41 --noclose -e
 #CONSOLE          = konsole --vt_sz 73x41 --noclose -e
 #CONSOLE            = konsole --noclose -e
-DEBUGGER         = gdb
+DEBUGGER         = gdb --quiet --args
 VALGRIND         = valgrind
 MEMCHECK         = $(VALGRIND) --tool=memcheck --leak-check=full --show-reachable=yes
 CACHEGRIND       = $(VALGRIND) --tool=callgrind
+GIT              = $(shell which git)
+GREP             = $(shell which grep)
+SED              = $(shell which sed)
+ECHO             = $(shell which echo)
+CAT              = $(shell which cat)
 ifeq ($(NP),)
 ifneq ($(np),)
 NP=$(np)
 endif
 endif
+NP ?= 2
+ifneq ($(NAME),)
+NAME_ARGUMENT   = --name $(NAME)
+endif
+ifneq ($(INPUT),)
+INPUT_ARGUMENT  = --input $(INPUT)
+endif
+ifneq ($(ARGS),)
+OTHER_ARGUMENT  = $(ARGS)
+endif
 #################################################################
 
-LINK_PREFERED    = shared
-# Link statically on clusters
 ifneq (,$(filter $(host), $(HPCVL_MACHINES) ))
-LINK_PREFERED    = static
+GREP            := $(shell which ggrep)
+SED             := $(shell which gsed)
 endif
 
 .PHONY: a b l all
@@ -221,16 +285,89 @@ b: all
 l: all
 all: $(BIN)
 
+# Add Git_Info.o to the objects, but only if it's not alreay present.
+ifeq (,$(filter $(OBJ), $(build_dir)/Git_Info.o ))
+OBJ += $(build_dir)/Git_Info.o
+endif
+
 .PHONY: o
 o: $(OBJ)
 
+# Git info is saved in src/Git_Info.cpp. Only used for Git.
+GIT_BRANCH := $(shell $(GIT) branch --no-color| $(GREP) "*" | $(SED) "s|* ||g")
+.PHONY: git_info
+git_info: src/Git_Info.cpp
+src/Git_Info.cpp: force
+	$(ECHO) "#include <StdCout.hpp>" > src/Git_Info.cpp
+	$(ECHO) -e "namespace $(LIB)\n{" >> src/Git_Info.cpp
+	$(ECHO) "    const char *git_build_sha = \"`$(GIT) rev-parse HEAD`\";" >> src/Git_Info.cpp
+	$(ECHO) "    const char *git_build_branch = \"$(GIT_BRANCH)\";" >> src/Git_Info.cpp
+	$(ECHO) "    const char *git_build_time = \"`date`\";" >> src/Git_Info.cpp
+	$(ECHO) "    const char *git_log_stat = \"`$(GIT) log --stat HEAD^..HEAD | $(SED) -e 's|\\"|\\\\"|g' | $(SED) -e '$$ ! s|$$| \\\\n\\\\|g'`\";" >> src/Git_Info.cpp
+ifeq ($(shell git diff | wc -l),0)
+	$(ECHO) "    const unsigned char src_Git_Diff_patch[] = {0x00};" >> src/Git_Info.cpp
+	$(ECHO) "    const unsigned int src_Git_Diff_patch_len = 1;" >> src/Git_Info.cpp
+else
+	git diff > src/Git_Diff.patch
+	xxd -i src/Git_Diff.patch src/Git_Diff.tmp
+	$(SED) src/Git_Diff.tmp -e "s|unsigned|const unsigned|g" -e "s|^|    |g" >> src/Git_Info.cpp
+	rm -f src/Git_Diff.tmp
+	rm -f src/Git_Diff.patch
+endif
+	$(CAT) src/Git_Info.cpp_template >> src/Git_Info.cpp
+	$(SED) -e "s|REPLACEMEWITHLIBNAME|$(LIB)|g" -i src/Git_Info.cpp
+
+VPATH            = $(subst $(space),$(column),$(SRCDIRS) ):$(subst $(space),$(column),$(TESTDIRS) )
+
+#################################################################
+# Call "make test" for building test suite
+TEST_SOURCES     = $(foreach DIR,$(TESTDIRS) .,$(wildcard $(DIR)/*.$(SRCEXT) ) )
+TEST_NAMES       = $(notdir $(subst .$(SRCEXT),,$(TEST_SOURCES) ) )
+TEST_OBJ         = $(addprefix $(build_dir)/,$(addsuffix .o, $(TEST_NAMES) ) )
+TEST_BIN         = $(BIN)_testing
+TEST_CFLAGS      =
+TEST_LDFLAGS     = -lboost_unit_test_framework
+
+ifneq ($(filter test, $(MAKECMDGOALS) ),)
+# Redefine the old binary target as being "empty"
+.PHONY: $(BIN)
+# Add testing components to compilation flags
+BIN             := $(BIN)_testing
+CFLAGS          := $(CFLAGS) $(TEST_CFLAGS)
+LDFLAGS         := $(LDFLAGS) $(TEST_LDFLAGS)
+# Make sure Main.o does not appear in the objects files since the unit testing already contains a main()
+OBJ             := $(subst $(build_dir)/Main.o,,$(OBJ)) $(TEST_OBJ)
+endif
+
+# Phony target for testing
+.PHONY: t test testing
+t: testing
+test: testing
+testing: $(BIN)
+
 # Linking
-$(BIN): $(OBJ)
-	$(LD) $(OBJ) -o $(BIN) $(LDFLAGS)
+$(BIN): clean_bin $(OBJ)
+	# ################################################################
+	# Linking...
+	# ################################################################
+	$(LD) $(strip $(CFLAGS) $(OBJ) -o $(BIN) $(LDFLAGS) $(sort $(MyLibs_Path)) $(MyLibs) $(netcdf_LDFLAG) )
 
 # Compilation of source files, depends on ALL headers
-$(build_dir)/%.o : %.$(SRCEXT) $(foreach DIR,$(SRCDIRS) .,$(wildcard $(DIR)/*.$(HEADEXT)))
-	$(COMPILER) $(strip $(CFLAGS) $(INCLUDES)) -c $< -o $@
+$(build_dir)/%.o : %.$(SRCEXT) $(HEADERS)
+	$(COMPILER) $(strip $(sort $(CFLAGS) ) $(INCLUDES) -c $< -o $@ )
+
+.PHONY: variables
+variables:
+	# LIB:           $(LIB)
+	# BIN:           $(BIN)
+	# OBJ:           $(OBJ)
+	#
+	# HEADERS:       $(HEADERS)
+	# TESTDIR:       $(TESTDIR)
+	# SOURCES:       $(SOURCES)
+	# TEST_SOURCES:  $(TEST_SOURCES)
+	# TEST_NAMES:    $(TEST_NAMES)
+	# TEST_OBJ:      $(TEST_OBJ)
 
 
 # Clean the project
@@ -242,13 +379,15 @@ clean: clean_bin clean_obj
 .PHONY: cb clean_bin
 cb: clean_bin
 clean_bin:
-	$(RM) $(BIN)
+ifeq ($(LIB),)
+	$(RM) $(BIN) $(TEST_BIN)
+endif
 
 # Clean the project of object files
 .PHONY: co clean_obj
 co: clean_obj
 clean_obj:
-	$(RM) -r build/*
+	$(RM) build/*
 #   find . -iname "*.o" -exec $(RM) {} \;
 #   find . -iname "*.a" -exec $(RM) {} \;
 #   find . -iname "*.so" -exec $(RM) {} \;
@@ -275,20 +414,20 @@ distclean: clean_bin clean_obj clean_data clean_doc
 .PHONY: r run
 r: run
 run: $(BIN)
-	./$(BIN)
+	$(SOFTLIMIT) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT) 2>&1 | tee output/make_run.log
 
 # Run the parallel program
 .PHONY: p rp pr
 rp: p
 pr: p
 p:
-	mpirun -np $(NP) ./$(BIN)
+	mpirun -np $(NP) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
 pk:
-	mpirun -np $(NP) $(CONSOLE) ./$(BIN)
+	mpirun -np $(NP) $(CONSOLE) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
 pkd:
-	mpirun -np $(NP) $(CONSOLE) $(DEBUGGER) ./$(BIN)
+	mpirun -np $(NP) $(CONSOLE) $(DEBUGGER) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
 pkv:
-	mpirun -np $(NP) $(CONSOLE) $(VALGRIND) ./$(BIN)
+	mpirun -np $(NP) $(CONSOLE) $(VALGRIND) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
 
 # Count the number of lines of project
 .PHONY: count
@@ -301,31 +440,38 @@ doc: doxygen
 doxygen:
 	doxygen
 
+# Run cppcheck on source code
+.PHONY: cppcheck check
+check: cppcheck
+cppcheck: force
+	cppcheck --enable=all $(SRCDIRS)
+
 # Run through valgrind for errors
 .PHONY: valgrind v vv
 v: valgrind
 valgrind: $(BIN)
-	$(MEMCHECK) ./$(BIN)
+	$(MEMCHECK) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
 vv: $(BIN)
-	$(MEMCHECK) --verbose ./$(BIN)
+	$(MEMCHECK) --verbose ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
 .PHONY: cachegrind cg
 cg: cachegrind
 cachegrind: $(BIN)
-	$(CACHEGRIND) ./$(BIN)
+	$(CACHEGRIND) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
 
 # Run through gdb for debugging
 .PHONY: g gdb
 g: gdb
 gdb: $(BIN)
-	gdb --quiet $(BIN)
+	$(DEBUGGER) ./$(BIN) $(NAME_ARGUMENT) $(INPUT_ARGUMENT) $(OTHER_ARGUMENT)
 
 #################################################################
 # Target depending on the binary. Necessary for the previous
 # lines "ifneq ($(filter ..." to work.
-.PHONY: mpi omp optimized ds
+.PHONY: mpi omp optimized dg ocl
 mpi: force
 omp: force
 optimized: force
+ocl: force
 ds: force
 
 # Force target
