@@ -16,6 +16,13 @@ using namespace boost;
 
 #include "tinyxml.hpp"
 
+
+namespace inputoutput
+{
+    // See Git_Info.cpp (generated dynamically from Git_Info.cpp_template & Makefile.rules)
+    void Log_Git_Info(std::string basename = "");
+}
+
 void Print_Double_in_Binary(double d);
 void Print_Double_in_Binary(float d);
 
