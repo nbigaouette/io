@@ -447,7 +447,7 @@ void IO::Close_File()
     {
 #ifdef COMPRESS_OUTPUT
         if (compressed_fh != NULL)
-            gzclose((gzFile *) compressed_fh);
+            gzclose((gzFile) compressed_fh);
         compressed_fh = NULL;
 #else // #ifdef COMPRESS_OUTPUT
         std_cout << "Can't be here!!! (" << __FILE__ << " line " << __LINE__ << "). Aborting.\n" << std::flush;
@@ -478,7 +478,7 @@ void IO::Write(const char *p, size_t size)
     if (Is_Compressed())
     {
 #ifdef COMPRESS_OUTPUT
-        const int error_code = gzwrite(compressed_fh, p, (unsigned int)size);
+        const int error_code = gzwrite((gzFile) compressed_fh, p, (unsigned int)size);
         assert(error_code != 0);
 #else
         std_cout << "Can't be here!!! (" << __FILE__ << " line " << __LINE__ << "). Aborting.\n" << std::flush;
@@ -522,7 +522,7 @@ void IO::WriteString(const std::string &format, ...)
         if (Is_Compressed())
         {
 #ifdef COMPRESS_OUTPUT
-        const int error_code = gzwrite(compressed_fh, string_to_save, (unsigned int)strlen(string_to_save));
+        const int error_code = gzwrite((gzFile) compressed_fh, string_to_save, (unsigned int)strlen(string_to_save));
         assert(error_code != 0);
 #else
         std_cout << "Can't be here!!! (" << __FILE__ << " line " << __LINE__ << "). Aborting.\n" << std::flush;
@@ -546,7 +546,7 @@ void IO::Flush()
     if (Is_Compressed())
     {
 #ifdef COMPRESS_OUTPUT
-        gzflush(compressed_fh, Z_FINISH);
+        gzflush((gzFile) compressed_fh, Z_FINISH);
 #else // #ifdef COMPRESS_OUTPUT
         std_cout << "Can't be here!!! (" << __FILE__ << " line " << __LINE__ << "). Aborting.\n" << std::flush;
         abort();
