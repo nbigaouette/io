@@ -12,6 +12,11 @@
 // **************************************************************
 int main(int argc, char *argv[])
 {
+    // **********************************************************
+    // Open log file
+    std_cout.open("output/output.log");
+
+    // **********************************************************
     // IO class
     IO test(true);
     test.Set_Filename("output/test.txt");
