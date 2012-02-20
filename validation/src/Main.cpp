@@ -61,6 +61,42 @@ int main(int argc, char *argv[])
     cdf_file_in.Read("float_array",     float_array); // float_array is already a pointer.
 
 
+    // **********************************************************
+    // XML class
+    const std::string xml_filename("input/test.xml");
+    ReadXML xml_input("root_node", xml_filename);
+
+    // Read data
+    const double      val1 = xml_input.Get_Double("subnode1/subsubnode_double");
+    const int         val2 = xml_input.Get_Int(   "subnode1/subsubnode_int");
+    const std::string val3 = xml_input.Get_String("subnode1/polarization");
+
+    // Check the "enable" attribute
+    const bool val2_enable = xml_input.Is_Enable("subnode1/subsubnode_int");
+    const bool val3_enable = xml_input.Is_Enable("subnode1/polarization");
+
+    // Validate any attributes value
+    xml_input.Verify_Attribute("subnode1/polarization", "circular", "yes");
+    // The following two give the same
+    xml_input.Verify_Attribute("subnode1/subsubnode_double", "unit", "meters");
+    xml_input.Verify_Unit("subnode1/subsubnode_double", "meters");
+
+    // Verify_Unit() throws a std::ios_base::failure exception on failure.
+    try
+    {
+        xml_input.Verify_Unit("subnode1/subsubnode_double", "meters2");
+    }
+    catch (std::ios_base::failure &error)
+    {
+        std_cout << "Unit verification failed: " << error.what() << "\n";
+    }
+
+    // Modify one or more values
+    xml_input.Set("subnode1/subsubnode_double", 9.87654321);
+
+    // Dump the modified content to a new file
+    xml_input.Dump("output/modified.xml");
+
 
     // **********************************************************
     std_cout << "Done!\n";

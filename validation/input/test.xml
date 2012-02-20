@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<root_node>
+
+    <subnode1>
+        <subsubnode_double unit="meters">1.23456789</subsubnode_double>
+        <subsubnode_int    unit="W"       enable="yes">2</subsubnode_int>
+        <polarization      circular="yes" enable="no">z</polarization>
+    </subnode1>
+
+</root_node>
