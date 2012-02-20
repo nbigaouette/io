@@ -61,5 +61,9 @@ int main(int argc, char *argv[])
     cdf_file_in.Read("float_array",     float_array); // float_array is already a pointer.
 
 
+
+    // **********************************************************
+    std_cout << "Done!\n";
+
     return EXIT_SUCCESS;
 }
