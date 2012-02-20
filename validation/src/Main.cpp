@@ -53,6 +53,13 @@ int main(int argc, char *argv[])
 
     cdf_file_out.Close();
 
+    // Now read data back
+    NetCDF_In cdf_file_in(netcdf_file);
+    cdf_file_in.Read("int_to_save",    &int_to_save);
+    cdf_file_in.Read("double_to_save", &double_to_save);
+    cdf_file_in.Read("float_to_save",  &float_to_save);
+    cdf_file_in.Read("float_array",     float_array); // float_array is already a pointer.
+
 
     return EXIT_SUCCESS;
 }
