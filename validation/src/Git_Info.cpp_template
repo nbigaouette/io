@@ -1,0 +1,40 @@
+
+    std::string FixedLength(const char *s, const int new_size = 41)
+    {
+        std::string tmp(s);
+        tmp.resize(new_size, ' ');
+        return tmp;
+    }
+
+    void Log_Git_Info(std::string basename)
+    {
+        std::string git_version("##############################################################\n");
+        git_version +=          "# Git information:                                           #\n";
+        git_version +=          "#    Library name: " + FixedLength("REPLACEMEWITHLIBNAME")+" #\n";
+        git_version +=          "#    Branch:       " + FixedLength(git_build_branch)     + " #\n";
+        git_version +=          "#    Commit id:    " + FixedLength(git_build_sha)        + " #\n";
+        git_version +=          "#    Build time:   " + FixedLength(git_build_time)       + " #\n";
+        git_version +=          "##############################################################\n";
+
+        std_cout << git_version << "\n";
+
+        if (basename != "")
+        {
+            git_version += git_log_stat;
+
+            std::string filename = basename + "/git_REPLACEMEWITHLIBNAME_version.log";
+            std::ofstream git_file;
+            git_file.open(filename.c_str());
+            git_file << git_version << "\n";
+            git_file.close();
+
+            std::string gitdiff = reinterpret_cast<const char*>(src_Git_Diff_patch);
+            filename = basename + "/git_REPLACEMEWITHLIBNAME_diff.patch";
+            git_file.open(filename.c_str(), std::fstream::out);
+            git_file << gitdiff << "\n";
+            git_file.close();
+        }
+    }
+
+
+} // namespace REPLACEMEWITHLIBNAME

@@ -1,3 +1,2 @@
-src/Version.cpp
-src/Git_Diff.cpp
 io_testing
+src/Git_Info.cpp
