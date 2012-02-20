@@ -1135,13 +1135,11 @@ void ReadXML::Verify_Attribute(const std::string element, const std::string attr
 
     if (read_attribute_value != value)
     {
-        std_cout
-            << std::endl << std::endl
-            << "ERROR in XML input file!" << std::endl
-            << "Attribute \"" << attribute << "\" in XML path \"" << element
-            << "\" read (" << read_attribute_value << ")" << std::endl
-            << "does not match the needed value (" << value << ")" << std::endl << std::endl << std::flush;
-        abort();
+        std::string error_msg = std::string("ERROR in XML input file! Attribute \"")
+                                + attribute + std::string("\" in XML path \"")
+                                + element + std::string("\" is not \"")
+                                + value  + std::string("\"");
+        throw std::ios_base::failure(error_msg);
     }
 }
 
