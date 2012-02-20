@@ -28,7 +28,7 @@ include makefiles/Makefile.rules
 #################################################################
 # Project specific options
 CFLAGS          +=
-LDFLAGS         +=
+LDFLAGS         += -lz
 
 LINK_PREFERED=static
 
