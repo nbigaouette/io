@@ -27,7 +27,7 @@ include makefiles/Makefile.rules
 
 #################################################################
 # Project specific options
-CFLAGS          +=
+CFLAGS          += -DTIXML_USE_STL
 LDFLAGS         += -lz
 
 LINK_PREFERED=static
