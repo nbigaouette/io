@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     cdf_file_out.Add_Variable_Scalar("float_to_save",   netcdf_type_float,  &float_to_save, "Float units");
     cdf_file_out.Add_Variable_1D("float_array",         netcdf_type_float,   float_array, 5, "Five", "Array units");
 
-    cdf_file.Close();
+    cdf_file_out.Close();
 
 
     return EXIT_SUCCESS;
