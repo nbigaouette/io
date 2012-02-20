@@ -285,45 +285,37 @@ b: all
 l: all
 all: $(BIN)
 
-# Add Git_Diff.o to the objects, but only if it's not alreay present.
-ifeq (,$(filter $(OBJ), $(build_dir)/Git_Diff.o ))
-OBJ += $(build_dir)/Git_Diff.o
-endif
-ifeq (,$(filter $(OBJ), $(build_dir)/Version.o ))
-OBJ += $(build_dir)/Version.o
+# Add Git_Info.o to the objects, but only if it's not alreay present.
+ifeq (,$(filter $(OBJ), $(build_dir)/Git_Info.o ))
+OBJ += $(build_dir)/Git_Info.o
 endif
 
 .PHONY: o
 o: $(OBJ)
 
-# Git revision is saved in src/Version.cpp. Only used for Git.
+# Git info is saved in src/Git_Info.cpp. Only used for Git.
 GIT_BRANCH := $(shell $(GIT) branch --no-color| $(GREP) "*" | $(SED) "s|* ||g")
-.PHONY: version
-version: src/Version.cpp
-src/Version.cpp: force
-	$(ECHO) "#include \"Version.hpp\"" > src/Version.cpp
-	$(ECHO) "const char *git_build_sha = \"`$(GIT) rev-parse HEAD`\";" >> src/Version.cpp
-	$(ECHO) "const char *git_build_branch = \"$(GIT_BRANCH)\";" >> src/Version.cpp
-	$(ECHO) "const char *git_build_time = \"`date`\";" >> src/Version.cpp
-	$(ECHO) "const char *git_log_stat = \"`$(GIT) log --stat HEAD^..HEAD | $(SED) -e 's|\\"|\\\\"|g' | $(SED) -e '$$ ! s|$$| \\\\n\\\\|g'`\";" >> src/Version.cpp
-
-# Keep differences of changes
-.PHONY: diff
-diff: src/Git_Diff.cpp
-src/Git_Diff.cpp: force
-	rm -f src/Git_Diff.cpp
-	$(ECHO) "#include \"Git_Diff.hpp\"" > src/Git_Diff.cpp
+.PHONY: git_info
+git_info: src/Git_Info.cpp
+src/Git_Info.cpp: force
+	$(ECHO) "#include <StdCout.hpp>" > src/Git_Info.cpp
+	$(ECHO) -e "namespace $(LIB)\n{" >> src/Git_Info.cpp
+	$(ECHO) "    const char *git_build_sha = \"`$(GIT) rev-parse HEAD`\";" >> src/Git_Info.cpp
+	$(ECHO) "    const char *git_build_branch = \"$(GIT_BRANCH)\";" >> src/Git_Info.cpp
+	$(ECHO) "    const char *git_build_time = \"`date`\";" >> src/Git_Info.cpp
+	$(ECHO) "    const char *git_log_stat = \"`$(GIT) log --stat HEAD^..HEAD | $(SED) -e 's|\\"|\\\\"|g' | $(SED) -e '$$ ! s|$$| \\\\n\\\\|g'`\";" >> src/Git_Info.cpp
 ifeq ($(shell git diff | wc -l),0)
-	$(ECHO) "const unsigned char src_Git_Diff_patch[] = {0x00};" >> src/Git_Diff.cpp
-	$(ECHO) "const unsigned int src_Git_Diff_patch_len = 1;" >> src/Git_Diff.cpp
+	$(ECHO) "    const unsigned char src_Git_Diff_patch[] = {0x00};" >> src/Git_Info.cpp
+	$(ECHO) "    const unsigned int src_Git_Diff_patch_len = 1;" >> src/Git_Info.cpp
 else
 	git diff > src/Git_Diff.patch
 	xxd -i src/Git_Diff.patch src/Git_Diff.tmp
-	$(CAT) src/Git_Diff.tmp >> src/Git_Diff.cpp
-	$(SED) -e "s|unsigned|const unsigned|g" -i src/Git_Diff.cpp
+	$(SED) src/Git_Diff.tmp -e "s|unsigned|const unsigned|g" -e "s|^|    |g" >> src/Git_Info.cpp
 	rm -f src/Git_Diff.tmp
 	rm -f src/Git_Diff.patch
 endif
+	$(CAT) src/Git_Info.cpp_template >> src/Git_Info.cpp
+	$(SED) -e "s|REPLACEMEWITHLIBNAME|$(LIB)|g" -i src/Git_Info.cpp
 
 VPATH            = $(subst $(space),$(column),$(SRCDIRS) ):$(subst $(space),$(column),$(TESTDIRS) )
 
@@ -395,7 +387,7 @@ endif
 .PHONY: co clean_obj
 co: clean_obj
 clean_obj:
-	$(RM) build/*
+	$(RM) -r build/*
 #   find . -iname "*.o" -exec $(RM) {} \;
 #   find . -iname "*.a" -exec $(RM) {} \;
 #   find . -iname "*.so" -exec $(RM) {} \;
