@@ -12,6 +12,7 @@
 // **************************************************************
 int main(int argc, char *argv[])
 {
+    // IO class
     IO test(true);
     test.Set_Filename("output/test.txt");
     test.Open_File("wz");
@@ -30,17 +31,19 @@ int main(int argc, char *argv[])
     test.Close_File();
 
 
-    NetCDF_Out cdf_file("output/test.cdf");
+    // NetCDF class
+    const std::string netcdf_file("output/test.cdf");
+    NetCDF_Out cdf_file_out(netcdf_file);
 
     int    int_to_save    = 123456789;
     double double_to_save = 1.23456789;
     float  float_to_save  = 9.87654321;
     float  float_array[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
 
-    cdf_file.Add_Variable_Scalar("int_to_save",     netcdf_type_int,    &int_to_save, "Int units");
-    cdf_file.Add_Variable_Scalar("double_to_save",  netcdf_type_double, &double_to_save, "Double units");
-    cdf_file.Add_Variable_Scalar("float_to_save",   netcdf_type_float,  &float_to_save, "Float units");
-    cdf_file.Add_Variable_1D("float_array",         netcdf_type_float,   float_array, 5, "Five", "Array units");
+    cdf_file_out.Add_Variable_Scalar("int_to_save",     netcdf_type_int,    &int_to_save, "Int units");
+    cdf_file_out.Add_Variable_Scalar("double_to_save",  netcdf_type_double, &double_to_save, "Double units");
+    cdf_file_out.Add_Variable_Scalar("float_to_save",   netcdf_type_float,  &float_to_save, "Float units");
+    cdf_file_out.Add_Variable_1D("float_array",         netcdf_type_float,   float_array, 5, "Five", "Array units");
 
     cdf_file.Close();
 
