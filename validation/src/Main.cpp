@@ -33,6 +33,22 @@ int main(int argc, char *argv[])
     test.Close_File();
     delete[] array;
 
+    // Save every "period" to the file. Set period to "-1" to save every time step.
+    const double dt     = 0.01;
+    const double tmax   = 100.0;
+    const double period = 0.3654;
+    IO output_file;
+    output_file.Init(period, "output/periodic_output.txt");
+    output_file.Open_File("w");
+    output_file.WriteString("# dt     = %g\n", dt);
+    output_file.WriteString("# tmax   = %g\n", tmax);
+    output_file.WriteString("# period = %g\n", period);
+    for (double time = 0.0 ; time < tmax ; time += dt)
+    {
+        if (output_file.Is_Output_Permitted(time))
+            output_file.WriteString("time = %g\n", time);
+    }
+    output_file.Close_File();
 
 
     // **********************************************************
