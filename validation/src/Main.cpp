@@ -30,10 +30,9 @@ int main(int argc, char *argv[])
         //std_cout << "array[i="<<i<<"] = " << array[i] << "\n";
         test.WriteString("%g\n", array[i]);
     }
-
+    test.Close_File();
     delete[] array;
 
-    test.Close_File();
 
 
     // **********************************************************
