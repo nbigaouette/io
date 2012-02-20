@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     test.Close_File();
 
 
+    // **********************************************************
     // NetCDF class
     const std::string netcdf_file("output/test.cdf");
     NetCDF_Out cdf_file_out(netcdf_file);
