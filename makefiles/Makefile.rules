@@ -467,7 +467,7 @@ gdb: $(BIN)
 #################################################################
 # Target depending on the binary. Necessary for the previous
 # lines "ifneq ($(filter ..." to work.
-.PHONY: mpi omp optimized dg ocl
+.PHONY: mpi omp optimized ds ocl
 mpi: force
 omp: force
 optimized: force
