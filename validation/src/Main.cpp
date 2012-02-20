@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     // Verify_Unit() throws a std::ios_base::failure exception on failure.
     try
     {
-        xml_input.Verify_Unit("subnode1/subsubnode_double", "meters2");
+        xml_input.Verify_Unit("subnode1/subsubnode_double", "wrong_unit");
     }
     catch (std::ios_base::failure &error)
     {
