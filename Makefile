@@ -25,7 +25,8 @@ include makefiles/Makefile.rules
 LIB_OBJ          = $(OBJ)
 
 # Compression. Uncomment to enable compression. Requires libz
-CFLAGS          += -DCOMPRESS_OUTPUT
+# Seems to cause a lot of overhead in saving the screen log (std_cout)
+#CFLAGS          += -DCOMPRESS_OUTPUT
 
 ### Following is needed for compression. Don't touch!
 ifneq (,$(findstring -DCOMPRESS_OUTPUT,$(CFLAGS)))
