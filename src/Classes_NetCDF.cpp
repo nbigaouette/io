@@ -894,6 +894,12 @@ template void NetCDF_Out::Add_Variable_Scalar<short int>(   const std::string na
 template void NetCDF_Out::Add_Variable_Scalar<unsigned short int>(const std::string name, const int type_index,
                                                             const unsigned short int *const pointer,
                                                             const std::string units);
+#ifdef __i386__
+// 'unsigned long int' is the same as uint64_t on x86_64, but not on i686!
+template void NetCDF_Out::Add_Variable_Scalar<unsigned long int>(const std::string name, const int type_index,
+                                                            const unsigned long int *const pointer,
+                                                            const std::string units);
+#endif // #ifdef __i386__
 template void NetCDF_Out::Add_Variable_Scalar<int>(         const std::string name, const int type_index,
                                                             const int *const pointer,
                                                             const std::string units);
