@@ -1255,10 +1255,10 @@ double ReadXML::Factor_Unit_To_Intensity_AU(const std::string element)
     std::string unit = Get_Unit(element);
     std::transform(unit.begin(), unit.end(), unit.begin(), ::tolower);
 
-    if      (unit == "w/cm^2")  unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
-    else if (unit == "w.cm-^2") unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
-    else if (unit == "w/m^2")   unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(                    libtinyxml::m_to_bohr, 2)));
-    else if (unit == "w.m-^2")  unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (pow(                    libtinyxml::m_to_bohr, 2)));
+    if      (unit == "w/cm^2")  unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (std::pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
+    else if (unit == "w.cm-^2") unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (std::pow(libtinyxml::cm_to_m*libtinyxml::m_to_bohr, 2)));
+    else if (unit == "w/m^2")   unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (std::pow(                    libtinyxml::m_to_bohr, 2)));
+    else if (unit == "w.m-^2")  unit_factor = ((libtinyxml::si_to_au_energy/libtinyxml::si_to_au_time) / (std::pow(                    libtinyxml::m_to_bohr, 2)));
     else
     {
         std_cout
